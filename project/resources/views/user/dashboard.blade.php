@@ -16,8 +16,23 @@
 </div>
 <!-- breadcrumb -->
 <!--==================== Blog Section Start ====================-->
-<div class="full-row">
    <div class="container">
+      @if(Auth::user()->is_vendor == 1)
+      <div class="row mb-4">
+          <div class="col-12 text-center">
+              <div class="p-4 rounded bg-white shadow-sm" style="border: 2px dashed #667eea;">
+                  <h3 class="mb-3" style="color: #667eea;">{{ __('Ready to create something new?') }}</h3>
+                  <p class="mb-4">{{ __('Head over to your Designer Studio to upload new artwork and create products.') }}</p>
+                  <a href="{{ route('vendor-prod-create', 'physical') }}" class="btn btn-lg btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border:none;">
+                      <i class="fas fa-palette mr-2"></i> {{ __('Open Designer Studio') }}
+                  </a>
+                  <a href="{{ route('vendor.dashboard') }}" class="btn btn-lg btn-outline-primary ml-2">
+                       {{ __('Go to Vendor Dashboard') }}
+                  </a>
+              </div>
+          </div>
+      </div>
+      @endif
         <div class="mb-4 d-xl-none">
             <button class="dashboard-sidebar-btn btn bg-primary rounded">
                 <i class="fas fa-bars"></i>

@@ -1,0 +1,107 @@
+<svg viewBox="0 0 2000 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- 1. Volume Gradient for Body -->
+    <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#eeeeee;stop-opacity:1" />
+      <stop offset="20%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="80%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#eeeeee;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- 2. Shadow Gradient -->
+    <linearGradient id="foldShadow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#000000;stop-opacity:0.05" />
+      <stop offset="100%" style="stop-color:#000000;stop-opacity:0" />
+    </linearGradient>
+
+     <!-- 3. Drop Shadow Filter -->
+    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="2" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.2"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- ================= FRONT VIEW (x:0-500) ================= -->
+  <g id="tshirt-front" transform="translate(50, 0)">
+    <g filter="url(#dropShadow)">
+        <path d="M 170,50 Q 250,90 330,50 L 330,60 Q 250,100 170,60 Z" fill="#cccccc" /> <!-- Top Neck Inner -->
+        <!-- Body -->
+        <path d="M 170,50 C 150,60 110,80 90,100 L 90,160 L 130,190 Q 135,220 135,250 C 130,350 130,480 130,520 Q 250,530 370,520 C 370,480 370,350 365,250 Q 365,220 370,190 L 410,160 L 410,100 C 390,80 350,60 330,50 Q 250,100 170,50 Z" 
+              fill="url(#bodyGradient)" stroke="#dddddd" stroke-width="1" />
+        <path d="M 170,50 Q 250,100 330,50 Q 320,55 315,60 Q 250,95 185,60 Q 180,55 170,50" 
+               fill="#ffffff" stroke="#e0e0e0" stroke-width="1"/>
+    </g>
+    <!-- Details -->
+    <rect x="150" y="150" width="200" height="250" fill="none" stroke="#00aaff" stroke-width="1" stroke-dasharray="5,5" opacity="0.3"/>
+    <text x="250" y="275" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#00aaff" opacity="0.3">FRONT</text>
+  </g>
+
+  <!-- ================= BACK VIEW (x:500-1000) ================= -->
+  <g id="tshirt-back" transform="translate(550, 0)">
+    <g filter="url(#dropShadow)">
+        <!-- Body Back -->
+        <path d="M 670,50 C 650,60 610,80 590,100 L 590,160 L 630,190 Q 635,220 635,250 C 630,350 630,480 630,520 Q 750,530 870,520 C 870,480 870,350 865,250 Q 865,220 870,190 L 910,160 L 910,100 C 890,80 850,60 830,50 Q 750,70 670,50 Z" 
+              fill="url(#bodyGradient)" stroke="#dddddd" stroke-width="1" />
+         <path d="M 670,50 Q 750,70 830,50 Q 820,55 815,60 Q 750,75 685,60 Q 680,55 670,50" 
+               fill="#ffffff" stroke="#e0e0e0" stroke-width="1"/>
+    </g>
+    <rect x="650" y="150" width="200" height="250" fill="none" stroke="#00aaff" stroke-width="1" stroke-dasharray="5,5" opacity="0.3"/>
+    <text x="750" y="275" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#00aaff" opacity="0.3">BACK</text>
+  </g>
+
+  <!-- ================= LEFT VIEW (x:1000-1500) ================= -->
+  <g id="tshirt-left" transform="translate(1050, 0)">
+    <g filter="url(#dropShadow)">
+        <!-- Side Profile Shape -->
+        <!-- Shoulder top (1200, 50) -->
+        <path d="M 1200,60 
+                 L 1150,90          <!-- Sleeve Top Edge -->
+                 L 1130,150         <!-- Sleeve Opening -->
+                 L 1180,180         <!-- Armpit -->
+                 Q 1185,250 1190,400 <!-- Side Seam Body -->
+                 L 1190,520
+                 Q 1250,530 1310,520 <!-- Bottom Hem -->
+                 L 1310,400          <!-- Back Side Seam -->
+                 Q 1315,250 1310,180
+                 Q 1310,150 1300,100
+                 L 1280,60           <!-- Neck Back -->
+                 L 1200,60 Z"
+              fill="url(#bodyGradient)" stroke="#dddddd" stroke-width="1"/>
+         
+         <!-- Sleeve Separator Line -->
+         <path d="M 1200,60 Q 1180,120 1180,180" fill="none" stroke="#dddddd" stroke-width="1"/>
+    </g>
+    <text x="1250" y="275" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#999" opacity="0.5">LEFT SIDE</text>
+  </g>
+
+  <!-- ================= RIGHT VIEW (x:1500-2000) ================= -->
+  <g id="tshirt-right" transform="translate(1550, 0)">
+    <g filter="url(#dropShadow)">
+        <!-- Mirrored Side Profile -->
+        <path d="M 1700,60
+                 L 1750,90          <!-- Sleeve Top -->
+                 L 1770,150         <!-- Sleeve Opening -->
+                 L 1720,180         <!-- Armpit -->
+                 Q 1715,250 1710,400
+                 L 1710,520
+                 Q 1650,530 1590,520
+                 L 1590,400
+                 Q 1585,250 1590,180
+                 Q 1590,150 1600,100
+                 L 1620,60
+                 L 1700,60 Z"
+              fill="url(#bodyGradient)" stroke="#dddddd" stroke-width="1"/>
+              
+         <path d="M 1700,60 Q 1720,120 1720,180" fill="none" stroke="#dddddd" stroke-width="1"/>
+    </g>
+    <text x="1650" y="275" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#999" opacity="0.5">RIGHT SIDE</text>
+  </g>
+
+</svg>

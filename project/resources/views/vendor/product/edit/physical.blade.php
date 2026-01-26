@@ -725,6 +725,66 @@
 										</div>
 
 
+
+									<div class="row">
+										<div class="col-lg-12">
+											<div class="left-area">
+												<h4 class="heading">{{ __('POD Configuration') }}*</h4>
+											</div>
+										</div>
+										<div class="col-lg-12">
+											<div class="checkbox-wrapper">
+												<input type="checkbox" name="is_pod" value="1" class="checkclick" id="is_pod" {{ $data->is_pod == 1 ? 'checked' : '' }}>
+												<label for="is_pod">{{ __('This is a Print-On-Demand Product') }}</label>
+											</div>
+										</div>
+									</div>
+
+									<div class="showbox" id="pod-section" style="display: {{ $data->is_pod == 1 ? 'block' : 'none' }}">
+										<div class="row">
+											<div class="col-lg-12">
+												<div class="left-area">
+													<h4 class="heading">{{ __('Upload Design File') }} *</h4>
+												</div>
+											</div>
+											<div class="col-lg-12">
+												<input type="file" class="input-field" name="print_file" accept=".png,.jpg,.jpeg,.ai,.psd,.pdf">
+												<p class="sub-heading">{{ __('Supported formats: PNG, JPG, AI, PSD, PDF') }}</p>
+												@if($data->print_file)
+													<p class="text-success">{{ __('Current File:') }} <a href="{{ asset('assets/files/designs/'.$data->print_file) }}" target="_blank">{{ $data->print_file }}</a></p>
+												@endif
+											</div>
+										</div>
+
+										<div class="row">
+											<div class="col-lg-6">
+												<div class="left-area">
+													<h4 class="heading">{{ __('Daily Production Capacity') }} *</h4>
+												</div>
+												<input type="number" class="input-field" name="production_cap" placeholder="{{ __('e.g. 50') }}" min="1" value="{{ $data->production_cap }}">
+											</div>
+											<div class="col-lg-6">
+												<div class="left-area">
+													<h4 class="heading">{{ __('Est. Print Time (Minutes)') }} *</h4>
+												</div>
+												<input type="number" class="input-field" name="print_time_minutes" placeholder="{{ __('e.g. 30') }}" min="1" value="{{ $data->print_time_minutes ?? 30 }}">
+											</div>
+										</div>
+
+										<div class="row">
+											<div class="col-lg-12">
+												<div class="left-area">
+													<h4 class="heading">{{ __('Quality Tier') }} *</h4>
+												</div>
+												<select name="quality_tier">
+													<option value="standard" {{ $data->quality_tier == 'standard' ? 'selected' : '' }}>{{ __('Standard') }}</option>
+													<option value="premium" {{ $data->quality_tier == 'premium' ? 'selected' : '' }}>{{ __('Premium') }}</option>
+													<option value="deluxe" {{ $data->quality_tier == 'deluxe' ? 'selected' : '' }}>{{ __('Deluxe') }}</option>
+												</select>
+											</div>
+										</div>
+									</div>
+
 										<div class="row">
 											<div class="col-lg-12">
 												<div class="left-area">
@@ -1381,6 +1441,14 @@ $('.cropme').simpleCropper();
 	}
 })
 
+    // POD Section Toggle
+    $(document).on('click', '#is_pod', function() {
+        if($(this).is(':checked')){
+            $('#pod-section').show();
+        } else {
+            $('#pod-section').hide();
+        }
+    });
 
 })(jQuery);
 

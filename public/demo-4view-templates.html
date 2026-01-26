@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>4-View Apparel Templates Demo</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: #f5f5f5;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        color: #666;
+        margin-bottom: 30px;
+      }
+
+      .garment-section {
+        margin-bottom: 50px;
+      }
+
+      .garment-title {
+        font-size: 24px;
+        color: #444;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e0e0e0;
+      }
+
+      .view-switcher {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      .view-btn {
+        padding: 10px 20px;
+        background: #f0f0f0;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s;
+      }
+
+      .view-btn:hover {
+        background: #e0e0e0;
+      }
+
+      .view-btn.active {
+        background: #6366f1;
+        color: white;
+        border-color: #6366f1;
+      }
+
+      .canvas-container {
+        background: #fafafa;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        min-height: 600px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .canvas-container svg {
+        max-width: 100%;
+        height: auto;
+      }
+
+      .view-group {
+        display: none;
+      }
+
+      .view-group.active {
+        display: block;
+      }
+
+      .info-box {
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 4px;
+      }
+
+      .info-box strong {
+        color: #1976d2;
+      }
+
+      .code-snippet {
+        background: #263238;
+        color: #aed581;
+        padding: 15px;
+        border-radius: 6px;
+        margin-top: 10px;
+        overflow-x: auto;
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎨 4-View Apparel Templates</h1>
+      <p class="subtitle">
+        Interactive demo of front, back, left, and right views for T-shirts and
+        Hoodies
+      </p>
+
+      <!-- T-SHIRT SECTION -->
+      <div class="garment-section">
+        <h2 class="garment-title">👕 T-Shirt Template</h2>
+
+        <div class="view-switcher">
+          <button class="view-btn active" onclick="switchTshirtView('front')">
+            Front View
+          </button>
+          <button class="view-btn" onclick="switchTshirtView('back')">
+            Back View
+          </button>
+          <button class="view-btn" onclick="switchTshirtView('left')">
+            Left Side
+          </button>
+          <button class="view-btn" onclick="switchTshirtView('right')">
+            Right Side
+          </button>
+        </div>
+
+        <div class="canvas-container" id="tshirt-canvas">
+          <!-- T-shirt SVG will be loaded here -->
+        </div>
+
+        <div class="info-box">
+          <strong>📁 File Location:</strong>
+          <code>public/assets/svg/tshirt-4view.svg</code><br />
+          <strong>Usage:</strong> Each view is in a separate
+          <code>&lt;g&gt;</code> group with IDs: <code>tshirt-front</code>,
+          <code>tshirt-back</code>, <code>tshirt-left</code>,
+          <code>tshirt-right</code>
+        </div>
+      </div>
+
+      <!-- HOODIE SECTION -->
+      <div class="garment-section">
+        <h2 class="garment-title">🧥 Hoodie Template</h2>
+
+        <div class="view-switcher">
+          <button class="view-btn active" onclick="switchHoodieView('front')">
+            Front View
+          </button>
+          <button class="view-btn" onclick="switchHoodieView('back')">
+            Back View
+          </button>
+          <button class="view-btn" onclick="switchHoodieView('left')">
+            Left Side
+          </button>
+          <button class="view-btn" onclick="switchHoodieView('right')">
+            Right Side
+          </button>
+        </div>
+
+        <div class="canvas-container" id="hoodie-canvas">
+          <!-- Hoodie SVG will be loaded here -->
+        </div>
+
+        <div class="info-box">
+          <strong>📁 File Location:</strong>
+          <code>public/assets/svg/hoodie-4view.svg</code><br />
+          <strong>Usage:</strong> Each view is in a separate
+          <code>&lt;g&gt;</code> group with IDs: <code>hoodie-front</code>,
+          <code>hoodie-back</code>, <code>hoodie-left</code>,
+          <code>hoodie-right</code>
+        </div>
+      </div>
+
+      <!-- INTEGRATION CODE -->
+      <div class="garment-section">
+        <h2 class="garment-title">💻 How to Integrate into Your App</h2>
+
+        <p style="margin-bottom: 15px">
+          Copy this code into your <code>physical.blade.php</code>:
+        </p>
+
+        <div class="code-snippet">
+          // Update MockupPreview templates with 4-view URLs<br />
+          mockupPreview.templates = {<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;'tshirt_white': {<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name: 'White
+          T-Shirt',<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;frontUrl: "{{
+          asset('assets/svg/tshirt-4view.svg#tshirt-front') }}",<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;backUrl: "{{
+          asset('assets/svg/tshirt-4view.svg#tshirt-back') }}",<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;leftUrl: "{{
+          asset('assets/svg/tshirt-4view.svg#tshirt-left') }}",<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rightUrl: "{{
+          asset('assets/svg/tshirt-4view.svg#tshirt-right') }}",<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;},<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;'hoodie_gray': {<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name: 'Gray
+          Hoodie',<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;frontUrl: "{{
+          asset('assets/svg/hoodie-4view.svg#hoodie-front') }}",<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;backUrl: "{{
+          asset('assets/svg/hoodie-4view.svg#hoodie-back') }}",<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;leftUrl: "{{
+          asset('assets/svg/hoodie-4view.svg#hoodie-left') }}",<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rightUrl: "{{
+          asset('assets/svg/hoodie-4view.svg#hoodie-right') }}",<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;}<br />
+          };
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Load T-shirt SVG
+      fetchAndInjectSVG(
+        "/assets/svg/tshirt-4view.svg",
+        "tshirt-canvas",
+        "tshirt",
+      );
+
+      // Load Hoodie SVG
+      fetchAndInjectSVG(
+        "/assets/svg/hoodie-4view.svg",
+        "hoodie-canvas",
+        "hoodie",
+      );
+
+      function fetchAndInjectSVG(url, containerId, prefix) {
+        fetch(url)
+          .then((response) => response.text())
+          .then((svgContent) => {
+            const container = document.getElementById(containerId);
+            container.innerHTML = svgContent;
+
+            // Hide all views except front
+            ["front", "back", "left", "right"].forEach((view) => {
+              const group = container.querySelector(`#${prefix}-${view}`);
+              if (group) {
+                group.style.display = view === "front" ? "block" : "none";
+              }
+            });
+          })
+          .catch((err) => {
+            console.error("Failed to load SVG:", err);
+            document.getElementById(containerId).innerHTML =
+              '<p style="color: red;">Failed to load SVG. Please check the file path.</p>';
+          });
+      }
+
+      function switchTshirtView(view) {
+        switchView("tshirt", view, event);
+      }
+
+      function switchHoodieView(view) {
+        switchView("hoodie", view, event);
+      }
+
+      function switchView(garment, view, event) {
+        const container = document.getElementById(`${garment}-canvas`);
+        const svg = container.querySelector("svg");
+
+        if (!svg) return;
+
+        // Update button states
+        const buttons =
+          event.target.parentElement.querySelectorAll(".view-btn");
+        buttons.forEach((btn) => btn.classList.remove("active"));
+        event.target.classList.add("active");
+
+        // Show/hide views
+        ["front", "back", "left", "right"].forEach((v) => {
+          const group = svg.querySelector(`#${garment}-${v}`);
+          if (group) {
+            group.style.display = v === view ? "block" : "none";
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

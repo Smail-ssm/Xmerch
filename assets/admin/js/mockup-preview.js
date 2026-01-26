@@ -10,13 +10,21 @@ class MockupPreview {
         this.ctx = null;
         this.currentView = 'front';
         
-        // Separate data for front and back
+        // Separate data for all views
         this.views = {
             front: {
                 templateImage: null,
-                layers: []  // All elements (images + text)
+                layers: []
             },
             back: {
+                templateImage: null,
+                layers: []
+            },
+            left: {
+                templateImage: null,
+                layers: []
+            },
+            right: {
                 templateImage: null,
                 layers: []
             }
@@ -34,8 +42,14 @@ class MockupPreview {
         // Templates
         this.templates = {};
         this.currentTemplateId = null;
+        this.productColor = null; // Hex color for tinting
         
         this.init();
+    }
+    
+    setProductColor(hex) {
+        this.productColor = hex;
+        this.render();
     }
     
     init() {
@@ -165,13 +179,42 @@ class MockupPreview {
     }
     
     /**
-     * Switch view (front/back)
+     * Switch view (front/back/left/right)
      */
     switchView(view) {
+        if (!this.views[view]) return; // Guard
+        
+        // Lazy Load: If image is missing, reload it for this specific view
+        if (!this.views[view].templateImage && this.currentTemplateId) {
+            console.warn(`View ${view} missing, lazy loading...`);
+            this.loadTemplate(this.currentTemplateId, view);
+        }
+
         this.currentView = view;
         this.selectedLayerIndex = -1;
+        
+        // Ensure the canvas size matches the template image
+        if(this.canvas && this.views[view].templateImage) {
+            const img = this.views[view].templateImage;
+            this.canvas.width = img.width;
+            this.canvas.height = img.height;
+        } else if (this.canvas) {
+             // Fallback default
+             this.canvas.width = 500;
+             this.canvas.height = 600;
+        }
+        
         this.render();
         this.updateLayersPanel();
+        
+        // Update UI buttons active state
+        const buttons = document.querySelectorAll('.view-btn');
+        if(buttons) {
+            buttons.forEach(btn => {
+                if(btn.dataset.view === view) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        }
     }
     
     /**
@@ -220,7 +263,8 @@ class MockupPreview {
     loadDefaultTemplate() {
         const keys = Object.keys(this.templates);
         if (keys.length > 0) {
-            this.loadTemplate(keys[0], 'front');
+            // Load all views (no second arg)
+            this.loadTemplate(keys[0]);
         }
     }
     
@@ -228,22 +272,49 @@ class MockupPreview {
         const template = this.templates[templateKey];
         if (!template) return Promise.reject('Template not found');
         
-        const targetView = view || this.currentView;
         this.currentTemplateId = templateKey;
         
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.onload = () => {
-                this.views[targetView].templateImage = img;
-                this.canvas.width = 400;
-                this.canvas.height = 450;
-                this.render();
-                resolve();
-            };
-            img.onerror = () => reject('Failed to load template');
-            img.src = template.url;
+        // Return a promise that resolves when ALL required views are loaded
+        const viewsToLoad = view ? [view] : ['front', 'back', 'left', 'right'];
+        const promises = viewsToLoad.map(v => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                
+                // Determine URL for this view
+                let url = template.url; // Default fallback
+                if (v === 'front' && template.frontUrl) url = template.frontUrl;
+                if (v === 'back' && template.backUrl) url = template.backUrl;
+                if (v === 'left' && template.leftUrl) url = template.leftUrl;
+                if (v === 'right' && template.rightUrl) url = template.rightUrl;
+                
+                // If no specific url found for this view (and it's not the default one), skip
+                // Actually, if we try to load 'left' but have no url, we should probably handle it gracefully.
+                // But for now, let's assume if it's in the list, we try to load it. 
+                // Using a placeholder or the default url might be confusing if it's the wrong image.
+                // Our template config has specific keys, so checking keys is good.
+                
+                img.onload = () => {
+                    this.views[v].templateImage = img;
+                    
+                    // If this is the current view, update canvas size immediately
+                    if(v === this.currentView) {
+                        this.canvas.width = img.width;
+                        this.canvas.height = img.height;
+                        this.render();
+                    }
+                    resolve();
+                };
+                img.onerror = () => {
+                    console.warn(`Failed to load ${v} template for ${templateKey}`);
+                    // Don't reject entire chain, just resolve (maybe missing image)
+                    resolve(); 
+                };
+                img.src = url;
+            });
         });
+        
+        return Promise.all(promises);
     }
     
     /**
@@ -273,7 +344,33 @@ class MockupPreview {
         // Draw template
         const template = this.getCurrentTemplate();
         if (template) {
+            // 1. Draw the base template image
             this.ctx.drawImage(template, 0, 0, this.canvas.width, this.canvas.height);
+            
+            // 2. Apply Product Color Tinting (if set)
+            // Fix: Explicitly skip tinting if color is white (#ffffff), 'white', or transparent
+            // This prevents the 'multiply' blend mode from darkening the white shirt into grey.
+            const isWhite = !this.productColor || 
+                           this.productColor === '#ffffff' || 
+                           this.productColor === 'white' || 
+                           this.productColor === 'transparent';
+
+            if (!isWhite) {
+                this.ctx.save();
+                
+                // A. 'multiply' blend mode:Colors the white parts, preserves black shadows
+                this.ctx.globalCompositeOperation = 'multiply';
+                this.ctx.fillStyle = this.productColor;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // B. 'destination-in' blend mode: 
+                // Uses the original image alpha channel to clip the result,
+                // ensuring we don't color the transparent background.
+                this.ctx.globalCompositeOperation = 'destination-in';
+                this.ctx.drawImage(template, 0, 0, this.canvas.width, this.canvas.height);
+                
+                this.ctx.restore();
+            }
         }
         
         // Draw all layers
@@ -557,29 +654,71 @@ class MockupPreview {
         const layers = this.getCurrentLayers();
         panel.html('');
         
+        // Add Base Product Layer (Static)
+        const baseLayer = $('<div>')
+            .addClass('layer-entry')
+            .removeClass('active'); // Base is usually background, not selectable in same way
+        
+        baseLayer.html(`
+            <i class="fas fa-tshirt layer-icon"></i>
+            <span style="flex:1">Base Product</span>
+            <i class="fas fa-lock" style="font-size:10px; opacity:0.5;"></i>
+        `);
+        panel.append(baseLayer);
+
         if (layers.length === 0) {
-            panel.html('<div class="no-layers">No layers yet</div>');
-            return;
+            // panel.append('<div class="no-layers" style="padding:10px; font-size:12px; color:#999; text-align:center;">No custom layers</div>');
+            // return;
         }
         
         layers.forEach((layer, index) => {
             const isSelected = index === this.selectedLayerIndex;
             const layerDiv = $('<div>')
-                .addClass('layer-item')
-                .toggleClass('selected', isSelected)
+                .addClass('layer-entry')
+                .toggleClass('active', isSelected)
                 .attr('data-index', index);
             
             const icon = layer.type === 'image' ? 'fa-image' : 'fa-font';
-            const name = layer.type === 'image' ? 'Image' : layer.text.substring(0, 20);
+            const name = layer.type === 'image' ? 'Image Layer' : (layer.text ? layer.text.substring(0, 15) : 'Text Layer');
             
             layerDiv.html(`
-                <i class="fas ${icon}"></i>
-                <span class="layer-name">${name}</span>
-                <button class="layer-delete" title="Delete"><i class="fas fa-trash"></i></button>
+                <i class="fas ${icon} layer-icon"></i>
+                <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${name}</span>
+                <button class="layer-delete-btn" style="border:none; background:transparent; color:#ff4444; cursor:pointer;" data-index="${index}"><i class="fas fa-trash"></i></button>
             `);
             
             panel.append(layerDiv);
         });
+
+        // Re-attach listeners to these specific elements? 
+        // Better to use delegated listeners once in init, but let's check if we did.
+        // We will assume jQuery delegated listeners are set up in the main file or we should add them here if possible.
+        // Actually, let's just add them here to be safe and self-contained
+        
+        $('.layer-entry[data-index]').off('click').on('click', (e) => {
+            if($(e.target).closest('.layer-delete-btn').length) return; // Ignore delete
+            const idx = parseInt($(e.currentTarget).data('index'));
+            this.selectedLayerIndex = idx;
+            this.render();
+            this.updateLayersPanel();
+            this.updateTextPanel();
+        });
+
+        $('.layer-delete-btn').off('click').on('click', (e) => {
+            e.stopPropagation();
+            const idx = parseInt($(e.currentTarget).data('index'));
+            this.deleteLayer(idx);
+        });
+    }
+
+    deleteLayer(index) {
+        const layers = this.getCurrentLayers();
+        if (index >= 0 && index < layers.length) {
+            layers.splice(index, 1);
+            this.selectedLayerIndex = -1;
+            this.render();
+            this.updateLayersPanel();
+        }
     }
     
     /**

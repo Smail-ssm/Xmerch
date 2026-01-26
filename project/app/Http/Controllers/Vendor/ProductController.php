@@ -382,7 +382,7 @@ class ProductController extends VendorBaseController
                 return response()->json(array('errors' => [ 0 => __('You must complete your verfication first.')]));
             }
         }
-        if($prods < $package->allowed_products || $package->allowed_products == 0)
+        if($package && ($prods < $package->allowed_products || $package->allowed_products == 0))
         {
 
         //--- Validation Section
@@ -438,6 +438,14 @@ class ProductController extends VendorBaseController
 
             if ($request->has('design_data')) {
                 $input['design_data'] = $request->design_data;
+            }
+
+            // POD Fields
+            if ($request->is_pod == 1) {
+                $input['is_pod'] = 1;
+                $input['production_cap'] = $request->production_cap;
+                $input['print_time_minutes'] = $request->print_time_minutes ?? 30;
+                $input['quality_tier'] = $request->quality_tier ?? 'standard';
             }
 
             // Check Physical
@@ -807,6 +815,30 @@ class ProductController extends VendorBaseController
                 $input['file'] = null;
             }
 
+
+            // POD Configuration Update
+            if($request->is_pod == 1) {
+                $input['is_pod'] = 1;
+                $input['production_cap'] = $request->production_cap;
+                $input['print_time_minutes'] = $request->print_time_minutes;
+                $input['quality_tier'] = $request->quality_tier;
+
+                // Handle Design File Upload
+                if ($file = $request->file('print_file')) {
+                    // remove old file if exists
+                     if($data->print_file != null){
+                            if (file_exists(public_path().'/assets/files/designs/'.$data->print_file)) {
+                            unlink(public_path().'/assets/files/designs/'.$data->print_file);
+                        }
+                    }
+                    
+                    $name = time().\Str::random(8).str_replace(' ', '', $file->getClientOriginalExtension());
+                    $file->move('assets/files/designs', $name);
+                    $input['print_file'] = $name;
+                }
+            } else {
+                 $input['is_pod'] = 0;
+            }
 
             // Check Physical
             if($data->type == "Physical")

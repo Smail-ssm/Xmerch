@@ -82,6 +82,9 @@ class CashOnDeliveryController extends CheckoutBaseControlller
         $order->fill($input)->save();
         $order->tracks()->create(['title' => 'Pending', 'text' => 'You have successfully placed your order.' ]);
         $order->notifications()->create();
+        
+        // POD: Create Print Jobs
+        OrderHelper::create_print_jobs($cart, $order);
 
         if($input['coupon_id'] != "") {
             OrderHelper::coupon_check($input['coupon_id']); // For Coupon Checking

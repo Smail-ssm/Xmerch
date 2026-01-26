@@ -1,0 +1,38 @@
+<svg viewBox="0 0 500 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="shirtGradientBack" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8f9fa;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e9ecef;stop-opacity:1" />
+    </linearGradient>
+    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+      <feOffset dx="0" dy="4" result="offsetblur"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.2"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <g id="shirt-back" transform="translate(100, 50)">
+    <!-- Main Body Back -->
+    <path d="M 80,0 
+             L 220,0 
+             L 280,60
+             L 260,150 
+             L 220,130 
+             L 220,450 
+             Q 150,460 80,450 
+             L 80,130 
+             L 40,150 
+             L 20,60
+             L 80,0
+             Z" 
+          fill="url(#shirtGradientBack)" stroke="#cccccc" stroke-width="1.5" filter="url(#dropShadow)"/>
+
+     <!-- Collar Back -->
+    <path d="M 80,0 Q 150,-10 220,0" fill="#f1f3f5" stroke="#ccc" stroke-width="1"/>
+    
+    <!-- Yoke -->
+    <path d="M 80,60 L 220,60" fill="none" stroke="#ddd" stroke-width="1" stroke-dasharray="2,2"/>
+
+  </g>
+</svg>

@@ -188,11 +188,15 @@ class OrderHelper
         try{
             foreach($cart->items as $prod)
             {
+                // POD CHECK: Skip stock update for POD products
+                $product = Product::find($prod['item']['id']);
+                if($product && isset($product->is_pod) && $product->is_pod == 1) {
+                    continue;
+                }
+
                 $x = (string)$prod['stock'];
                 if($x != null)
                 {
-
-                    $product = Product::find($prod['item']['id']);
                     $product->stock =  $prod['stock'];
                     $product->update();
                     if($product->stock <= 5)

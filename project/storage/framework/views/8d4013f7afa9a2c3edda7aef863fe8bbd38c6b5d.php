@@ -150,6 +150,13 @@
 
     </li>
 
+    <li>
+        <a href="<?php echo e(route('admin-printjob-index')); ?>">
+            <i class="fas fa-print"></i>
+            <span><?php echo e(__('Print Queue Dashboard')); ?></span>
+        </a>
+    </li>
+
     <?php if(Auth::guard('admin')->user()->IsSuper() || Auth::guard('admin')->user()->sectionCheck('print_production') || Auth::guard('admin')->user()->sectionCheck('manufacturing')): ?>
     <li>
         <a href="#printer" class="accordion-toggle wave-effect" data-toggle="collapse" aria-expanded="false">

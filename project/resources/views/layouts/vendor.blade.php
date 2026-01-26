@@ -183,6 +183,9 @@
 							<li>
 								<a href="{{ route('vendor-wt-index') }}" class=" wave-effect"><i class="fas fa-list"></i>{{ __('Withdraws') }}</a>
 							</li>
+							<li>
+								<a href="{{ route('user-package') }}" class="wave-effect"><i class="fas fa-crown"></i>{{ __('Subscription Plan') }}</a>
+							</li>
 
 							<li>
 								<a href="#general" class="accordion-toggle wave-effect" data-toggle="collapse" aria-expanded="false">

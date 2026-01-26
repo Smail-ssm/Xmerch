@@ -66,6 +66,14 @@ class PaymentGateway extends Model
             $link = route('front.voguepay.submit');
         }else if($data == 'cod'){
             $link = route('front.cod.submit');
+        }else if($data == 'flouci'){
+            $link = route('front.flouci.submit');
+        }else if($data == 'konnect'){
+            $link = route('front.konnect.submit');
+        }else if($data == 'paymee'){
+            $link = route('front.paymee.submit');
+        }else if($data == 'd17'){
+            $link = route('front.d17.submit');
         }else{
             $link = route('front.manual.submit');
         }
@@ -101,6 +109,12 @@ class PaymentGateway extends Model
             $link = route('user.ssl.submit');
         }else if($data == 'voguepay'){
             $link = route('user.voguepay.submit');
+        }else if($data == 'flouci'){
+            $link = route('user.flouci.submit');
+        }else if($data == 'konnect'){
+            $link = route('user.konnect.submit');
+        }else if($data == 'paymee'){
+            $link = route('user.paymee.submit');
         }else if($data == null){
             $link = route('user.manual.submit');
         }
@@ -136,6 +150,12 @@ class PaymentGateway extends Model
             $link = route('deposit.ssl.submit');
         }else if($data == 'voguepay'){
             $link = route('deposit.voguepay.submit');
+        }else if($data == 'flouci'){
+            $link = route('deposit.flouci.submit');
+        }else if($data == 'konnect'){
+            $link = route('deposit.konnect.submit');
+        }else if($data == 'paymee'){
+            $link = route('deposit.paymee.submit');
         }else if($data == null){
             $link = route('deposit.manual.submit');
         }
@@ -146,7 +166,7 @@ class PaymentGateway extends Model
     public function showForm(){
         $show = '';
         $data = $this->keyword == null ? 'other' : $this->keyword;
-        $values = ['cod','voguepay','sslcommerz','flutterwave','razorpay','mollie','paytm','paystack','paypal','instamojo'];
+        $values = ['cod','voguepay','sslcommerz','flutterwave','razorpay','mollie','paytm','paystack','paypal','instamojo','flouci','konnect','paymee','d17'];
         if (in_array($data, $values)){
             $show = 'no';
         }else{

@@ -144,6 +144,13 @@
         <i class="fas fa-tools"></i> {{ __('Manufacturing') }}
     </li>
 
+    <li>
+        <a href="{{ route('admin-printjob-index') }}">
+            <i class="fas fa-print"></i>
+            <span>{{ __('Print Queue Dashboard') }}</span>
+        </a>
+    </li>
+
     @if(Auth::guard('admin')->user()->IsSuper() || Auth::guard('admin')->user()->sectionCheck('print_production') || Auth::guard('admin')->user()->sectionCheck('manufacturing'))
     <li>
         <a href="#printer" class="accordion-toggle wave-effect" data-toggle="collapse" aria-expanded="false">

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="41bab519-6929-48c0-8882-a9ece5f143c0" name="vps" url="">
+        <fileTransfer rootFolder="/var/www/xbet/xbet" accessType="SFTP" host="84.247.141.252" port="22" sshConfigId="48e2acca-8528-462b-b5a3-0a61e94cdaa3" sshConfig="deploy@84.247.141.252:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" isUseRsync="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

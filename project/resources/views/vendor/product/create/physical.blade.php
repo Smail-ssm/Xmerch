@@ -10,445 +10,271 @@
    POD DESIGN UPLOAD - MODERN LAYOUT
    ============================================ */
 
-.pod-page {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.pod-section {
-    background: #fff;
-    border-radius: 16px;
-    margin-bottom: 25px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    overflow: hidden;
-}
-
-.pod-section-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 20px 25px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
-}
-
-.pod-section-header.info { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-.pod-section-header.pricing { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-
-.pod-section-header i {
-    font-size: 24px;
-}
-
-.pod-section-header h3 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-}
-
-.pod-section-header span {
-    font-size: 13px;
-    opacity: 0.9;
-}
-
-.pod-section-body {
-    padding: 25px;
-}
-
 /* ============================================
-   SECTION 1: DESIGNER TOOL
+   PRO EDITOR THEME (IMG.LY INSPIRED)
    ============================================ */
 
-.designer-container {
+:root {
+    --editor-bg: #f3f4f6;
+    --panel-bg: #ffffff;
+    --border-color: #e5e7eb;
+    --accent-color: #4f46e5;
+    --accent-hover: #4338ca;
+    --text-main: #111827;
+    --text-sub: #6b7280;
+    --surface-hover: #f9fafb;
+    --header-height: 60px;
+}
+
+.pod-app-container {
     display: flex;
-    min-height: 450px;
-    background: #2d2d2d;
+    height: 80vh;
+    min-height: 600px;
+    background: var(--editor-bg);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-main);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* --- LEFT PANEL: LAYERS --- */
+.editor-sidebar-left {
+    width: 240px;
+    background: var(--panel-bg);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    z-index: 20;
+}
+
+.sidebar-header {
+    height: 50px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-main);
+    justify-content: space-between;
+}
+
+.layers-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+}
+
+.layer-entry {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 13px;
+}
+
+.layer-entry:hover {
+    background: var(--surface-hover);
+    border-color: var(--accent-color);
+}
+
+.layer-entry.active {
+    background: #eef2ff;
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+.layer-icon {
+    color: var(--text-sub);
+    font-size: 14px;
+}
+
+.layer-entry.active .layer-icon { color: var(--accent-color); }
+
+/* --- CENTER: CANVAS --- */
+.editor-canvas-stage {
+    flex: 1;
+    background: var(--editor-bg);
+    display: flex;
+    flex-direction: column;
+    position: relative;
     overflow: hidden;
 }
 
-.designer-toolbar {
-    width: 60px;
-    background: #1a1a1a;
+.stage-toolbar {
+    height: 50px;
+    padding: 0 20px;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    padding: 15px 0;
-    gap: 5px;
+    justify-content: center; /* Center the view switcher */
+    pointer-events: none; /* Let clicks pass through if needed, but buttons need pointer-events:auto */
 }
 
-.tool-btn {
-    width: 44px;
-    height: 44px;
+.view-switcher-pill {
+    pointer-events: auto;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 100px;
+    padding: 4px;
+    display: flex;
+    gap: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.view-btn {
+    padding: 6px 16px;
+    border-radius: 100px;
     border: none;
-    border-radius: 8px;
     background: transparent;
-    color: #888;
-    font-size: 18px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-sub);
     cursor: pointer;
     transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
-.tool-btn:hover, .tool-btn.active {
-    background: #3d3d3d;
-    color: #fff;
-}
+.view-btn:hover { background: var(--surface-hover); color: var(--text-main); }
+.view-btn.active { background: var(--text-main); color: #fff; }
 
-.tool-divider {
-    width: 30px;
-    height: 1px;
-    background: #444;
-    margin: 10px 0;
-}
-
-.color-swatches {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    padding: 5px;
-    max-width: 50px;
-}
-
-.color-swatch {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid transparent;
-    transition: transform 0.2s;
-}
-
-.color-swatch:hover, .color-swatch.active {
-    transform: scale(1.2);
-    border-color: #fff;
-}
-
-.designer-canvas {
+.canvas-viewport {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
-    background: 
-        linear-gradient(45deg, #333 25%, transparent 25%),
-        linear-gradient(-45deg, #333 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, #333 75%),
-        linear-gradient(-45deg, transparent 75%, #333 75%);
-    background-size: 20px 20px;
-    background-color: #3a3a3a;
     position: relative;
+    background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+    background-size: 20px 20px;
 }
 
-.canvas-wrapper {
-    background: #fff;
-    border-radius: 8px;
-    padding: 10px;
-    box-shadow: 0 5px 30px rgba(0,0,0,0.4);
+.canvas-frame {
+    /* The literal mockup canvas */
+    box-shadow: 0 20px 50px -10px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
 }
 
-#mockup-canvas {
-    display: block;
-    max-height: 400px;
-}
-
-.upload-design-btn {
+/* Floating Actions (Center Bottom) */
+.stage-actions {
     position: absolute;
-    bottom: 20px;
+    bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
-    background: #007bff;
-    color: #fff;
-    padding: 12px 30px;
-    border-radius: 25px;
-    border: none;
-    font-size: 14px;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0,123,255,0.4);
-}
-
-.designer-views {
-    width: 90px;
-    background: #1a1a1a;
-    padding: 15px 8px;
     display: flex;
-    flex-direction: column;
     gap: 12px;
+    pointer-events: auto;
 }
 
-.view-thumb {
-    background: #333;
-    border-radius: 8px;
-    padding: 8px;
-    cursor: pointer;
-    border: 2px solid transparent;
-    text-align: center;
-}
-
-.view-thumb:hover, .view-thumb.active {
-    border-color: #007bff;
-}
-
-.view-thumb i { font-size: 24px; color: #888; }
-.view-thumb span { display: block; color: #888; font-size: 11px; margin-top: 5px; }
-
-/* Text Panel */
-.text-tool-panel {
-    position: absolute;
-    top: 20px;
-    left: 80px;
-    background: #fff;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 5px 25px rgba(0,0,0,0.3);
-    width: 260px;
-    display: none;
-    z-index: 100;
-}
-
-.text-tool-panel.show { display: block; }
-.text-tool-panel h5 { margin: 0 0 12px; font-size: 14px; }
-.text-tool-panel .form-row { display: flex; gap: 8px; margin-bottom: 8px; }
-.text-tool-panel input, .text-tool-panel select { flex: 1; padding: 6px; border: 1px solid #ddd; border-radius: 4px; }
-.text-tool-panel textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: none; height: 50px; }
-.text-tool-panel .btn-apply { width: 100%; padding: 8px; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-top: 8px; }
-
-/* Layers Panel */
-.layers-panel {
-    position: absolute;
-    bottom: 20px;
-    right: 110px;
-    width: 180px;
-    background: #fff;
-    border-radius: 8px;
-    padding: 10px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-    max-height: 250px;
-    overflow-y: auto;
-}
-
-.layers-panel h6 { margin: 0 0 10px; font-size: 12px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
-
-.layer-item {
-    padding: 6px 8px;
-    background: #f5f5f5;
-    border-radius: 4px;
-    margin-bottom: 4px;
+.action-btn-pill {
+    background: var(--text-main);
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 14px;
     display: flex;
     align-items: center;
     gap: 8px;
     cursor: pointer;
-    border: 2px solid transparent;
+    box-shadow: 0 10px 20px -5px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+}
+.action-btn-pill:hover { transform: translateY(-3px); box-shadow: 0 15px 30px -5px rgba(0,0,0,0.3); }
+
+/* --- RIGHT PANEL: INSPECTOR --- */
+.editor-sidebar-right {
+    width: 320px;
+    background: var(--panel-bg);
+    border-left: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    z-index: 20;
+    overflow-y: auto;
 }
 
-.layer-item.selected { background: #e3f2fd; border-color: #2196f3; }
-.layer-item i { color: #666; font-size: 12px; }
-.layer-name { flex: 1; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.layer-delete { background: none; border: none; color: #dc3545; cursor: pointer; padding: 2px; opacity: 0; }
-.layer-item:hover .layer-delete { opacity: 1; }
+.inspector-section {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
 
-/* ============================================
-   SECTION 2: PRODUCT INFO
-   ============================================ */
+.section-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-sub);
+    margin-bottom: 16px;
+    display: block;
+}
 
-.info-grid {
+/* Grid Tools */
+.asset-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+    gap: 12px;
 }
 
-.form-group {
-    margin-bottom: 0;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    font-size: 14px;
-    color: #333;
-}
-
-.form-group label span {
-    color: #dc3545;
-}
-
-.form-control {
-    width: 100%;
-    padding: 12px 15px;
-    border: 2px solid #e9ecef;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: border-color 0.3s;
-}
-
-.form-control:focus {
-    border-color: #007bff;
-    outline: none;
-}
-
-.form-group.full-width {
-    grid-column: 1 / -1;
-}
-
-/* ============================================
-   SECTION 3: PRICING
-   ============================================ */
-
-.pricing-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.pricing-option {
-    background: #f8f9fa;
-    border-radius: 10px;
-    padding: 15px;
-    border: 2px solid transparent;
-    transition: all 0.3s;
-}
-
-.pricing-option:hover {
-    border-color: #667eea;
-}
-
-.pricing-option label {
-    display: block;
-    font-weight: 600;
-    font-size: 13px;
-    margin-bottom: 10px;
-    color: #333;
-}
-
-.pricing-option label i {
-    margin-right: 6px;
-    color: #667eea;
-}
-
-.pricing-option select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    background: #fff;
-}
-
-.pricing-summary {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.asset-card {
+    border: 1px solid var(--border-color);
     border-radius: 12px;
-    padding: 20px;
-    color: #fff;
-}
-
-.pricing-item {
-    text-align: center;
-    padding: 10px;
-}
-
-.pricing-item.highlight {
-    background: rgba(255,255,255,0.15);
-    border-radius: 8px;
-}
-
-.pricing-item .label {
-    font-size: 12px;
-    opacity: 0.9;
-    margin-bottom: 5px;
-}
-
-.pricing-item .value {
-    font-size: 24px;
-    font-weight: bold;
-}
-
-.pricing-item.highlight .value {
-    font-size: 32px;
-}
-
-/* Margin Slider */
-.margin-slider {
-    background: #f8f9fa;
-    border-radius: 10px;
-    padding: 15px;
-    margin-bottom: 20px;
-}
-
-.margin-slider label {
+    padding: 16px;
     display: flex;
-    justify-content: space-between;
-    font-weight: 600;
-    margin-bottom: 10px;
-}
-
-.margin-slider input[type="range"] {
-    width: 100%;
-}
-
-.margin-display {
-    display: inline-block;
-    background: #667eea;
-    color: #fff;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-weight: bold;
-}
-
-/* ============================================
-   SUBMIT SECTION
-   ============================================ */
-
-.submit-section {
-    display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    padding: 20px 25px;
-    background: #f8f9fa;
-    border-radius: 12px;
-}
-
-.submit-btn {
-    padding: 15px 40px;
-    font-size: 16px;
-    font-weight: 600;
-    border: none;
-    border-radius: 8px;
+    gap: 10px;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.2s;
+    background: #fff;
+    text-align: center;
 }
 
-.submit-btn.primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
+.asset-card:hover { border-color: var(--accent-color); background: #eef2ff; color: var(--accent-color); }
+.asset-card i { font-size: 20px; }
+.asset-card span { font-size: 13px; font-weight: 500; }
+
+/* Config Inputs */
+.config-group { margin-bottom: 15px; }
+.config-input {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--surface-hover);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text-main);
+}
+.config-input:focus { outline: none; border-color: var(--accent-color); background: #fff; }
+
+/* Color Circles */
+.color-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.color-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent; /* Ring */
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+}
+.color-dot.active { border-color: var(--accent-color); transform: scale(1.1); }
+
+/* --- RESPONSIVE --- */
+@media (max-width: 1024px) {
+    .pod-app-container { flex-direction: column; height: auto; }
+    .editor-sidebar-left, .editor-sidebar-right { width: 100%; height: auto; max-height: 200px; }
+    .editor-canvas-stage { height: 500px; }
+    .stage-actions { bottom: 20px; }
 }
 
-.submit-btn.secondary {
-    background: #6c757d;
-    color: #fff;
-}
+/* Hide legacy */
+.pod-hide { display: none; }
 
-.submit-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-}
-
-/* Responsive */
-@media (max-width: 991px) {
-    .designer-container { flex-direction: column; }
-    .designer-toolbar { flex-direction: row; width: 100%; justify-content: center; }
-    .designer-views { flex-direction: row; width: 100%; justify-content: center; }
-    .info-grid, .pricing-grid { grid-template-columns: 1fr; }
-    .pricing-summary { grid-template-columns: repeat(2, 1fr); }
-}
-
-/* Hide old elements */
-.pod-hide { display: none !important; }
 </style>
 
 @endsection
@@ -488,88 +314,127 @@
                     </div>
                 </div>
                 <div class="pod-section-body" style="padding: 0;">
-                    <div class="designer-container">
-                        {{-- Toolbar --}}
-                        <div class="designer-toolbar">
-                            <button type="button" class="tool-btn active" id="tool-product" title="Product Type">
-                                <i class="fas fa-tshirt"></i>
-                            </button>
-                            <div class="tool-divider"></div>
-                            <div class="color-swatches">
-                                <div class="color-swatch active" style="background:#fff" data-color="white"></div>
-                                <div class="color-swatch" style="background:#000" data-color="black"></div>
-                                <div class="color-swatch" style="background:#dc3545" data-color="red"></div>
-                                <div class="color-swatch" style="background:#007bff" data-color="blue"></div>
-                                <div class="color-swatch" style="background:#28a745" data-color="green"></div>
-                                <div class="color-swatch" style="background:#ffc107" data-color="yellow"></div>
+                    <!-- PRO EDITOR UI -->
+                    <div class="pod-app-container">
+                        
+                        <!-- LEFT SIDEBAR: LAYERS -->
+                        <div class="editor-sidebar-left">
+                            <div class="sidebar-header">
+                                <span>LAYERS</span>
+                                <small style="color:var(--text-sub)">Drag to reorder</small>
                             </div>
-                            <div class="tool-divider"></div>
-                            <button type="button" class="tool-btn" id="tool-upload" title="Upload Design">
-                                <i class="fas fa-upload"></i>
-                            </button>
-                            <button type="button" class="tool-btn" id="tool-text" title="Add Text">
-                                <i class="fas fa-font"></i>
-                            </button>
-                            <div class="tool-divider"></div>
-                            <button type="button" class="tool-btn" id="tool-rotate" title="Rotate">
-                                <i class="fas fa-sync-alt"></i>
-                            </button>
-                            <button type="button" class="tool-btn" id="tool-reset" title="Delete Selected">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-
-                        {{-- Canvas --}}
-                        <div class="designer-canvas">
-                            <div class="canvas-wrapper">
-                                <canvas id="mockup-canvas" width="400" height="420"></canvas>
-                            </div>
-                            <label for="design-upload-input" class="upload-design-btn">
-                                <i class="fas fa-cloud-upload-alt"></i> Upload Your Design
-                            </label>
-                            <input type="file" id="design-upload-input" accept="image/*" style="display:none;">
-                            
-                            {{-- Text Panel --}}
-                            <div class="text-tool-panel" id="text-panel">
-                                <h5><i class="fas fa-font"></i> Add Text</h5>
-                                <div class="form-row">
-                                    <select id="text-font">
-                                        <option value="Arial">Arial</option>
-                                        <option value="Impact">Impact</option>
-                                        <option value="Georgia">Georgia</option>
-                                    </select>
-                                    <select id="text-size">
-                                        <option value="24">24px</option>
-                                        <option value="32" selected>32px</option>
-                                        <option value="48">48px</option>
-                                    </select>
+                            <div id="layers-panel" class="layers-list">
+                                 <!-- Layers injected via JS -->
+                                 <div class="layer-entry active">
+                                    <i class="fas fa-tshirt layer-icon"></i>
+                                    <span style="flex:1">Base Product</span>
+                                    <i class="fas fa-lock" style="font-size:10px; opacity:0.5;"></i>
                                 </div>
-                                <div class="form-row">
-                                    <input type="color" id="text-color" value="#000000">
-                                    <button type="button" id="text-bold" style="font-weight:bold;">B</button>
-                                    <button type="button" id="text-italic" style="font-style:italic;">I</button>
-                                </div>
-                                <textarea id="text-input" placeholder="Enter your text..."></textarea>
-                                <button type="button" class="btn-apply" id="apply-text">Add Text</button>
-                            </div>
-                            
-                            {{-- Layers Panel --}}
-                            <div class="layers-panel">
-                                <h6>Layers</h6>
-                                <div id="layers-panel"></div>
                             </div>
                         </div>
 
-                        {{-- Views --}}
-                        <div class="designer-views">
-                            <div class="view-thumb active" data-view="front">
-                                <i class="fas fa-tshirt"></i>
-                                <span>Front</span>
+                        <!-- CENTER: CANVAS STAGE -->
+                        <div class="editor-canvas-stage">
+                            
+                            <!-- Top Toolbar (View Switcher) -->
+                            <div class="stage-toolbar">
+                                <div class="view-switcher-pill">
+                                    <button type="button" class="view-btn active" data-view="front">Front</button>
+                                    <button type="button" class="view-btn" data-view="back">Back</button>
+                                    <button type="button" class="view-btn" data-view="left">Left</button>
+                                    <button type="button" class="view-btn" data-view="right">Right</button>
+                                </div>
                             </div>
-                            <div class="view-thumb" data-view="back">
-                                <i class="fas fa-tshirt"></i>
-                                <span>Back</span>
+
+                            <!-- Canvas Area -->
+                            <div class="canvas-viewport">
+                                <div class="canvas-frame">
+                                    <canvas id="mockup-canvas" width="500" height="550"></canvas>
+                                </div>
                             </div>
+
+                            <!-- Bottom Actions -->
+                            <div class="stage-actions">
+                                 <button type="button" class="action-btn-pill" id="tool-zoom-in" title="Zoom In"><i class="fas fa-search-plus"></i></button>
+                                 <button type="button" class="action-btn-pill" id="tool-zoom-out" title="Zoom Out"><i class="fas fa-search-minus"></i></button>
+                            </div>
+
+                        </div>
+
+                        <!-- RIGHT SIDEBAR: INSPECTOR & TOOLS -->
+                        <div class="editor-sidebar-right">
+                            
+                            <!-- ADD ASSETS SECTION -->
+                            <div class="inspector-section">
+                                <span class="section-label">Add Assets</span>
+                                <div class="asset-grid">
+                                    <div class="asset-card" id="tool-text">
+                                        <i class="fas fa-font" style="color:#6366f1"></i>
+                                        <span>Add Text</span>
+                                    </div>
+                                    <div class="asset-card" id="tool-upload">
+                                        <i class="fas fa-cloud-upload-alt" style="color:#10b981"></i>
+                                        <span>Upload Image</span>
+                                    </div>
+                                </div>
+                                <input type="file" id="design-upload-input" accept="image/*" style="display:none;">
+                            </div>
+
+                            <!-- PRODUCT CONFIG SECTION -->
+                            <div class="inspector-section">
+                                <span class="section-label">Product Configuration</span>
+                                <div class="config-group">
+                                    <label style="font-size:13px; font-weight:600; margin-bottom:8px; display:block;">Base Product</label>
+                                    <button type="button" class="config-input" id="tool-product" style="text-align:left; display:flex; justify-content:space-between; align-items:center;">
+                                        <span>Change Product</span>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                                <div class="config-group">
+                                    <label style="font-size:13px; font-weight:600; margin-bottom:8px; display:block;">Colors</label>
+                                    <div class="color-options">
+                                        <div class="color-dot active" style="background:#ffffff; border:1px solid #ddd;" data-color="white" data-hex="#ffffff"></div>
+                                        <div class="color-dot" style="background:#0f172a" data-color="black" data-hex="#0f172a"></div>
+                                        <div class="color-dot" style="background:#ef4444" data-color="red" data-hex="#ef4444"></div>
+                                        <div class="color-dot" style="background:#3b82f6" data-color="blue" data-hex="#3b82f6"></div>
+                                        <div class="color-dot" style="background:#10b981" data-color="green" data-hex="#10b981"></div>
+                                        <div class="color-dot" style="background:#f59e0b" data-color="yellow" data-hex="#f59e0b"></div>
+                                        <div class="color-dot" style="background:#8b5cf6" data-color="purple" data-hex="#8b5cf6"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- TEXT PROPERTIES (Hidden by default or shown when text selected - keeping static for now) -->
+                            <div class="inspector-section tool-properties-panel" id="text-properties-panel">
+                                <span class="section-label">Text Properties</span>
+                                <div class="config-group">
+                                    <textarea id="text-input" class="config-input" rows="2" placeholder="Edit text..."></textarea>
+                                </div>
+                                <div class="config-group">
+                                    <div style="display:flex; gap:8px;">
+                                        <select id="text-font" class="config-input">
+                                            <option value="Arial">Arial</option>
+                                            <option value="Helvetica">Helvetica</option>
+                                            <option value="Times New Roman">Times</option>
+                                            <option value="Impact">Impact</option>
+                                        </select>
+                                        <input type="number" id="text-size" class="config-input" value="32" style="width:70px;">
+                                    </div>
+                                </div>
+                                <div class="config-group">
+                                    <div style="display:flex; gap:8px;">
+                                        <input type="color" id="text-color" value="#000000" style="height:38px; width:100%; padding:0; border:none; border-radius:6px; cursor:pointer;">
+                                        <button type="button" class="config-input" id="add-text-btn" style="background:var(--accent-color); color:#fff; border:none;">Update</button>
+                                    </div>
+                                </div>
+                                <div class="config-group">
+                                    <div style="display:flex; gap:8px;">
+                                        <button type="button" id="text-bold" class="config-input" style="flex:1; font-weight:bold;">B</button>
+                                        <button type="button" id="text-italic" class="config-input" style="flex:1; font-style:italic;">I</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -597,6 +462,10 @@
                             <label>{{ __('Production Cap (Minimum Batch)') }} <i class="fas fa-question-circle" title="Production will only start once this many orders are reached for this design."></i></label>
                             <input type="number" name="production_cap" class="form-control" value="1" min="1" required>
                             <small class="text-muted">Orders will queue until this total is reached.</small>
+                        </div>
+                         <div class="form-group">
+                            <label>{{ __('Est. Print Time (Minutes)') }}</label>
+                            <input type="number" name="print_time_minutes" class="form-control" value="30" min="15">
                         </div>
                         <div class="form-group">
                             <label>{{ __('Category') }} <span>*</span></label>
@@ -644,11 +513,10 @@
                     <div class="pricing-grid">
                         <div class="pricing-option">
                             <label><i class="fas fa-print"></i> Print Quality</label>
-                            <select id="print-quality">
+                            <select id="print-quality" name="quality_tier">
                                 <option value="standard" data-price="0">Standard (+$0)</option>
-                                <option value="hd" data-price="3">HD Print (+$3)</option>
                                 <option value="premium" data-price="5">Premium (+$5)</option>
-                                <option value="dtg" data-price="8">DTG (+$8)</option>
+                                <option value="deluxe" data-price="8">Deluxe (+$8)</option>
                             </select>
                         </div>
                         <div class="pricing-option">
@@ -744,9 +612,192 @@
 
 <script src="{{asset('assets/admin/js/jquery.Jcrop.js')}}"></script>
 <script src="{{asset('assets/admin/js/jquery.SimpleCropper.js')}}"></script>
-<script src="{{asset('assets/admin/js/mockup-preview.js')}}"></script>
-<script src="{{asset('assets/admin/js/mockup-events.js')}}"></script>
+<script src="{{asset('assets/admin/js/mockup-preview.js')}}?v=3.2"></script>
+<!-- <script src="{{asset('assets/admin/js/mockup-events.js')}}"></script> -->
 <script src="{{asset('assets/admin/js/quality-pricing.js')}}"></script>
+<script>
+    // Pro Editor Logic
+    $(document).ready(function() {
+        
+        // Initialize Mockup Preview
+        try {
+            mockupPreview = new MockupPreview({
+                canvasId: 'mockup-canvas'
+            });
+            
+            // Define Templates with Front/Back/Left/Right URLs
+            mockupPreview.templates = {
+                'tshirt_white': {
+                    name: 'White T-Shirt',
+                    frontUrl: "{{ asset('assets/images/mockups/tshirt/front.png') }}",
+                    backUrl: "{{ asset('assets/images/mockups/tshirt/back.png') }}",
+                    leftUrl: "{{ asset('assets/images/mockups/tshirt/left.png') }}",
+                    rightUrl: "{{ asset('assets/images/mockups/tshirt/right.png') }}",
+                    productType: 'tshirt',
+                    color: 'white',
+                },
+                'tshirt_black': {
+                    name: 'Black T-Shirt',
+                    frontUrl: "{{ asset('assets/images/mockups/tshirt/front.svg') }}",
+                    backUrl: "{{ asset('assets/images/mockups/tshirt/back.svg') }}",
+                    leftUrl: "{{ asset('assets/images/mockups/tshirt/left.svg') }}",
+                    rightUrl: "{{ asset('assets/images/mockups/tshirt/right.svg') }}",
+                    productType: 'tshirt',
+                    color: 'black',
+                },
+                'hoodie_white': {
+                    name: 'White Hoodie',
+                    frontUrl: "{{ asset('assets/images/mockups/hoodie/front.svg') }}",
+                    backUrl: "{{ asset('assets/images/mockups/hoodie/back.svg') }}",
+                    leftUrl: "{{ asset('assets/images/mockups/hoodie/left.svg') }}",
+                    rightUrl: "{{ asset('assets/images/mockups/hoodie/right.svg') }}",
+                    productType: 'hoodie',
+                    color: 'white',
+                },
+                'shirt_white': {
+                    name: 'White Shirt',
+                    frontUrl: "{{ asset('assets/images/mockups/shirt/front.svg') }}",
+                    backUrl: "{{ asset('assets/images/mockups/shirt/back.svg') }}",
+                    leftUrl: "{{ asset('assets/images/mockups/shirt/left.svg') }}",
+                    rightUrl: "{{ asset('assets/images/mockups/shirt/right.svg') }}",
+                    productType: 'shirt',
+                    color: 'white',
+                }
+            };
+            
+            mockupPreview.loadDefaultTemplate();
+            
+        } catch(e) {
+            console.error("Mockup Init Error:", e);
+        }
+
+        // --- ASSET TOOLS ---
+        
+        // Add Text Focus
+        $('#tool-text').on('click', function() {
+            $('#text-input').focus();
+            // Highlight properties panel
+            $('#text-properties-panel').addClass('highlight-panel');
+            setTimeout(() => $('#text-properties-panel').removeClass('highlight-panel'), 800);
+        });
+        
+        // Add/Update Text Button
+        $('#add-text-btn').on('click', function() {
+              const text = $('#text-input').val() || 'New Text';
+              const font = $('#text-font').val();
+              const size = parseInt($('#text-size').val());
+              const color = $('#text-color').val();
+              const isBold = $('#text-bold').hasClass('active');
+              const isItalic = $('#text-italic').hasClass('active');
+              
+              if(mockupPreview) {
+                  // If layer selected, update it? Or always add new?
+                  // For now, let's always add new for simplicity, or update if we had a "selected" state tracking
+                  mockupPreview.addTextLayer({
+                      text: text,
+                      fontFamily: font,
+                      fontSize: size,
+                      color: color,
+                      bold: isBold,
+                      italic: isItalic
+                  });
+              }
+        });
+
+        // Upload Trigger
+        $('#tool-upload').on('click', function() {
+            $('#design-upload-input').click();
+        });
+        
+        // File Input Change
+        $('#design-upload-input').on('change', function(e) {
+            if(e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                     if(mockupPreview) mockupPreview.addImageLayer(evt.target.result);
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        // --- CONFIGURATION TOOLS ---
+
+        // Product Switcher
+        $('#tool-product').on('click', function() {
+            if(mockupPreview) {
+                 const current = mockupPreview.currentTemplateId;
+                 let next = 'tshirt_black';
+                 if(current === 'tshirt_black') next = 'hoodie_white';
+                 else if(current === 'hoodie_white') next = 'tshirt_white';
+                 else next = 'tshirt_black';
+                 
+                 mockupPreview.loadTemplate(next);
+            }
+        });
+        
+        // View Switcher (Front/Back)
+        $('.view-btn').on('click', function() {
+            if($(this).attr('disabled')) return;
+            $('.view-btn').removeClass('active');
+            $(this).addClass('active');
+            
+            const view = $(this).data('view');
+            if(mockupPreview) mockupPreview.switchView(view);
+        });
+
+        // Color Dots (Product Color)
+        $('.color-dot').on('click', function() {
+            $('.color-dot').removeClass('active');
+            $(this).addClass('active');
+            
+            const colorHex = $(this).data('hex');
+            
+            // For tinting to work best, we usually want the White template
+            // If the user selects 'Black' specifically, we might want to load the dedicated Black template if it exists,
+            // otherwise we tint the white one (which results in a dark grey usually, not true black).
+            // For now, let's try to stick to the 'Base' White template for all colors except specific ones if we wanted.
+            
+            // Ensure we are using a "tintable" base (White)
+            // If current template is 'tshirt_black', switch to 'tshirt_white' then tint
+            if (mockupPreview) {
+                 if (mockupPreview.currentTemplateId && mockupPreview.currentTemplateId.includes('black')) {
+                     // Switch to white equivalent for better tinting
+                     const newId = mockupPreview.currentTemplateId.replace('black', 'white');
+                     if (mockupPreview.templates[newId]) {
+                         mockupPreview.loadTemplate(newId).then(() => {
+                             mockupPreview.setProductColor(colorHex);
+                         });
+                     } else {
+                         mockupPreview.setProductColor(colorHex);
+                     }
+                 } else {
+                     mockupPreview.setProductColor(colorHex);
+                 }
+            }
+        });
+
+        // Zoom Tools
+        $('#tool-zoom-in').on('click', function() {
+            // Implement zoom logic using CSS transform on canvas-frame or internal canvas scale
+            const currentScale = parseFloat($('#mockup-canvas').data('scale') || 1);
+            // Limit max zoom to 2.0 (200%) to preserve PNG quality
+            const newScale = Math.min(currentScale + 0.1, 2.0);
+            $('#mockup-canvas').css('transform', `scale(${newScale})`).data('scale', newScale);
+        });
+        
+        $('#tool-zoom-out').on('click', function() {
+            const currentScale = parseFloat($('#mockup-canvas').data('scale') || 1);
+            const newScale = Math.max(currentScale - 0.1, 0.5);
+            $('#mockup-canvas').css('transform', `scale(${newScale})`).data('scale', newScale);
+        });
+        
+        // Text Enhancements
+        $('#text-bold, #text-italic').on('click', function() {
+            $(this).toggleClass('active');
+        });
+
+    });
+</script>
 
 <script>
 $(document).ready(function() {

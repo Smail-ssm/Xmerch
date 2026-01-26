@@ -3,7 +3,7 @@
 $host = '127.0.0.1';
 $db = 'xmerch';
 $user = 'root';
-$pass = '';
+$pass = 'root';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
@@ -21,6 +21,14 @@ try {
         echo "✓ Migrations table exists\n";
     } else {
         echo "✗ Migrations table does not exist\n";
+    }
+
+    // Check if print_jobs table exists
+    $stmt = $pdo->query("SHOW TABLES LIKE 'print_jobs'");
+    if ($stmt->rowCount() > 0) {
+        echo "✓ print_jobs table exists\n";
+    } else {
+        echo "✗ print_jobs table does not exist\n";
     }
     
 } catch (PDOException $e) {

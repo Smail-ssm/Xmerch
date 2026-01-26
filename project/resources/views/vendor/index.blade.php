@@ -7,7 +7,30 @@
                                     <h3>{{ $user->displayWarning() }} </h3> <a href="{{ route('vendor-warning',$user->verifies()->where('admin_warning','=','1')->latest('id')->first()->id) }}"> {{ __('Verify Now') }} </a>
                                 </div>
                             @endif
+
+                            @if(!$user->checkStatus())
+                                <div class="alert alert-warning validation text-center" style="background-color: #fff3cd; color: #856404; border-color: #ffeeba;">
+                                    @if($user->checkVerification())
+                                        <h3><i class="fas fa-hourglass-half"></i> {{ __('Verification Pending Approval') }}</h3>
+                                        <p>{{ __('Your documents are under review.') }}</p>
+                                    @else
+                                        <h3><i class="fas fa-exclamation-triangle"></i> {{ __('Verification Required') }}</h3> 
+                                        <p>{{ __('Please submit your documents to start selling.') }}</p>
+                                        <a href="{{ route('vendor-verify') }}" class="btn btn-warning" style="color:#fff;"> {{ __('Verify Now') }} </a>
+                                    @endif
+                                </div>
+                            @endif
+
                         @include('alerts.form-success')
+
+                        <div class="row mb-4">
+                            <div class="col-12 text-right">
+                                <a href="{{ route('vendor-prod-create', 'physical') }}" class="btn btn-primary btn-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border:none; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                                    <i class="fas fa-plus"></i> {{ __('Create New Design') }}
+                                </a>
+                            </div>
+                        </div>
+
                         <div class="row row-cards-one">
                                 <div class="col-md-12 col-lg-6 col-xl-4">
                                     <div class="mycard bg1">

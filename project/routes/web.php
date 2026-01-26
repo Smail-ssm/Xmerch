@@ -395,6 +395,28 @@ Route::delete('/state/delete/{id}', 'Admin\StateController@delete')->name('admin
 
   //------------ ADMIN POD PRICING SECTION ENDS------------
 
+  //------------ ADMIN PRINT JOB SECTION ------------
+  
+  Route::prefix('admin')->middleware('auth:admin')->group(function() {
+      Route::get('/printjobs', 'Admin\PrintJobController@index')->name('admin-printjob-index');
+      Route::get('/printjobs/queue', 'Admin\PrintJobController@queue')->name('admin-printjob-queue');
+      Route::get('/printjobs/printing', 'Admin\PrintJobController@printing')->name('admin-printjob-printing');
+      Route::get('/printjobs/completed', 'Admin\PrintJobController@completed')->name('admin-printjob-completed');
+      Route::get('/printjobs/failed', 'Admin\PrintJobController@failed')->name('admin-printjob-failed');
+      Route::get('/printjobs/datatables/{status}', 'Admin\PrintJobController@datatables')->name('admin-printjob-datatables');
+      Route::get('/printjobs/{id}', 'Admin\PrintJobController@show')->name('admin-printjob-show');
+      Route::post('/printjobs/{id}/start', 'Admin\PrintJobController@start')->name('admin-printjob-start');
+      Route::post('/printjobs/{id}/complete', 'Admin\PrintJobController@complete')->name('admin-printjob-complete');
+      Route::post('/printjobs/{id}/fail', 'Admin\PrintJobController@fail')->name('admin-printjob-fail');
+      Route::post('/printjobs/{id}/hold', 'Admin\PrintJobController@hold')->name('admin-printjob-hold');
+      Route::post('/printjobs/{id}/resume', 'Admin\PrintJobController@resume')->name('admin-printjob-resume');
+      Route::post('/printjobs/{id}/assign', 'Admin\PrintJobController@assign')->name('admin-printjob-assign');
+      Route::post('/printjobs/bulk', 'Admin\PrintJobController@bulkAction')->name('admin-printjob-bulk');
+      Route::get('/printjobs/capacity/stats', 'Admin\PrintJobController@capacityStats')->name('admin-printjob-capacity');
+  });
+
+  //------------ ADMIN PRINT JOB SECTION ENDS ------------
+
   //------------ ADMIN PRINTER SECTION (POD Manufacturing) ------------
 
   Route::group(['middleware'=>'permissions:print_production'],function(){
@@ -1353,6 +1375,25 @@ Route::get('/forgot','Auth\User\ForgotController@index')->name('user.forgot');
     // Manual
     Route::post('/manual-submit', 'Payment\Subscription\ManualPaymentController@store')->name('user.manual.submit');
 
+    // ============ TUNISIAN SUBSCRIPTION GATEWAYS ============
+
+    // Flouci
+    Route::post('/flouci-submit', 'Payment\Subscription\FlouciController@store')->name('user.flouci.submit');
+    Route::get('/flouci-success', 'Payment\Subscription\FlouciController@success')->name('user.flouci.success');
+    Route::get('/flouci-cancel', 'Payment\Subscription\FlouciController@cancel')->name('user.flouci.cancel');
+
+    // Konnect
+    Route::post('/konnect-submit', 'Payment\Subscription\KonnectController@store')->name('user.konnect.submit');
+    Route::get('/konnect-success', 'Payment\Subscription\KonnectController@success')->name('user.konnect.success');
+    Route::get('/konnect-cancel', 'Payment\Subscription\KonnectController@cancel')->name('user.konnect.cancel');
+
+    // Paymee
+    Route::post('/paymee-submit', 'Payment\Subscription\PaymeeController@store')->name('user.paymee.submit');
+    Route::get('/paymee-success', 'Payment\Subscription\PaymeeController@success')->name('user.paymee.success');
+    Route::get('/paymee-cancel', 'Payment\Subscription\PaymeeController@cancel')->name('user.paymee.cancel');
+
+    // ============ END TUNISIAN SUBSCRIPTION GATEWAYS ============
+
     // USER SUBSCRIPTION ENDS
 
     // USER DEPOSIT
@@ -1415,6 +1456,25 @@ Route::get('/forgot','Auth\User\ForgotController@index')->name('user.forgot');
 
     // Manual
     Route::post('/deposit/manual-submit', 'Payment\Deposit\ManualPaymentController@store')->name('deposit.manual.submit');
+
+    // ============ TUNISIAN DEPOSIT GATEWAYS ============
+
+    // Flouci
+    Route::post('/deposit/flouci-submit', 'Payment\Deposit\FlouciController@store')->name('deposit.flouci.submit');
+    Route::get('/deposit/flouci-success', 'Payment\Deposit\FlouciController@success')->name('deposit.flouci.success');
+    Route::get('/deposit/flouci-cancel', 'Payment\Deposit\FlouciController@cancel')->name('deposit.flouci.cancel');
+
+    // Konnect
+    Route::post('/deposit/konnect-submit', 'Payment\Deposit\KonnectController@store')->name('deposit.konnect.submit');
+    Route::get('/deposit/konnect-success', 'Payment\Deposit\KonnectController@success')->name('deposit.konnect.success');
+    Route::get('/deposit/konnect-cancel', 'Payment\Deposit\KonnectController@cancel')->name('deposit.konnect.cancel');
+
+    // Paymee
+    Route::post('/deposit/paymee-submit', 'Payment\Deposit\PaymeeController@store')->name('deposit.paymee.submit');
+    Route::get('/deposit/paymee-success', 'Payment\Deposit\PaymeeController@success')->name('deposit.paymee.success');
+    Route::get('/deposit/paymee-cancel', 'Payment\Deposit\PaymeeController@cancel')->name('deposit.paymee.cancel');
+
+    // ============ END TUNISIAN DEPOSIT GATEWAYS ============
 
     // USER DEPOSIT ENDS
 
@@ -1616,7 +1676,30 @@ Route::post('/item/report', 'Front\CatalogController@report')->name('product.rep
     // Cash On Delivery
     Route::post('/checkout/payment/cod-submit', 'Payment\Checkout\CashOnDeliveryController@store')->name('front.cod.submit');
 
-    // Flutterwave Notify Routes
+    // ============ TUNISIAN PAYMENT GATEWAYS ============
+
+    // Flouci
+    Route::post('/checkout/payment/flouci-submit', 'Payment\Checkout\FlouciController@store')->name('front.flouci.submit');
+    Route::get('/checkout/payment/flouci-success', 'Payment\Checkout\FlouciController@success')->name('front.flouci.success');
+    Route::get('/checkout/payment/flouci-cancel', 'Payment\Checkout\FlouciController@cancel')->name('front.flouci.cancel');
+    Route::post('/checkout/payment/flouci-notify', 'Payment\Checkout\FlouciController@notify')->name('front.flouci.notify');
+
+    // Konnect
+    Route::post('/checkout/payment/konnect-submit', 'Payment\Checkout\KonnectController@store')->name('front.konnect.submit');
+    Route::get('/checkout/payment/konnect-success', 'Payment\Checkout\KonnectController@success')->name('front.konnect.success');
+    Route::get('/checkout/payment/konnect-cancel', 'Payment\Checkout\KonnectController@cancel')->name('front.konnect.cancel');
+    Route::post('/checkout/payment/konnect-notify', 'Payment\Checkout\KonnectController@notify')->name('front.konnect.notify');
+
+    // Paymee
+    Route::post('/checkout/payment/paymee-submit', 'Payment\Checkout\PaymeeController@store')->name('front.paymee.submit');
+    Route::get('/checkout/payment/paymee-success', 'Payment\Checkout\PaymeeController@success')->name('front.paymee.success');
+    Route::get('/checkout/payment/paymee-cancel', 'Payment\Checkout\PaymeeController@cancel')->name('front.paymee.cancel');
+    Route::post('/checkout/payment/paymee-notify', 'Payment\Checkout\PaymeeController@notify')->name('front.paymee.notify');
+
+    // D17 (Ooredoo) - Placeholder for future implementation
+    // Route::post('/checkout/payment/d17-submit', 'Payment\Checkout\D17Controller@store')->name('front.d17.submit');
+
+    // ============ END TUNISIAN PAYMENT GATEWAYS ============
 
     // Deposit
     Route::post('/dflutter/notify', 'Payment\Deposit\FlutterwaveController@notify')->name('deposit.flutter.notify');
