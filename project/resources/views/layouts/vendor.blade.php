@@ -44,8 +44,13 @@
 
 		@endif
 
+
 		@yield('styles')
 
+
+
+
+        </style>
 	</head>
 	<body>
 		<div class="page">
@@ -54,8 +59,12 @@
 				<div class="header">
 					<div class="container-fluid">
 						<div class="d-flex mobile-menu-check justify-content-between">
-							<a class="admin-logo" href="{{ route('front.index') }}" target="_blank">
+							<a class="admin-logo" href="{{ route('front.index') }}" target="_blank" style="text-decoration: none;">
+                                @if(file_exists(base_path('../assets/images/'.$gs->logo)))
 								<img src="{{asset('assets/images/'.$gs->logo)}}" alt="">
+                                @else
+								<h3 class="text-white font-weight-bold mb-0" style="font-size: 24px;">{{$gs->title}}</h3>
+                                @endif
 							</a>
 							<div class="menu-toggle-button">
 								<a class="nav-link" href="javascript:;" id="sidebarCollapse">
@@ -81,13 +90,30 @@
 										</div>
 									</li>
 
+
 									<li class="login-profile-area">
 										<a class="dropdown-toggle-1" href="javascript:;">
 											<div class="user-img">
-												@if(Auth::user()->is_provider == 1)
-												<img src="{{ Auth::user()->photo ? asset(Auth::user()->photo):asset('assets/images/noimage.png') }}" alt="">
+												@if(Auth::user()->photo && !empty(trim(Auth::user()->photo)))
+													@if(Auth::user()->is_provider == 1)
+													<img src="{{ asset(Auth::user()->photo) }}" alt="" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover;">
+													@else
+													<img src="{{ asset('assets/images/users/'.Auth::user()->photo ) }}" alt="" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover;">
+													@endif
 												@else
-												<img src="{{ Auth::user()->photo ? asset('assets/images/users/'.Auth::user()->photo ):asset('assets/images/noimage.png') }}" alt="">
+													@php
+														$name = Auth::user()->name ?: 'User';
+														$nameParts = explode(' ', trim($name));
+														$initials = '';
+														if (count($nameParts) >= 2) {
+															$initials = strtoupper(substr($nameParts[0], 0, 1) . substr($nameParts[count($nameParts)-1], 0, 1));
+														} else {
+															$initials = strtoupper(substr($name, 0, 2));
+														}
+													@endphp
+													<div class="user-initials-badge" style="width: 35px; height: 35px; border-radius: 50%; background: var(--theme-light-color); display: flex; align-items: center; justify-content: center; color: var(--theme-dark-color); font-weight: 600; font-size: 14px; border: 1px solid var(--theme-gray-color);">
+														{{ $initials }}
+													</div>
 												@endif
 											</div>
 										</a>
@@ -148,7 +174,11 @@
 								</a>
 								<ul class="collapse list-unstyled" id="menu2" data-parent="#accordion">
 									<li>
-										<a href="{{ route('vendor-prod-types') }}"><span>{{ __('Upload New Design') }}</span></a>
+										@if($gs->pod_designer_mode == 1)
+										<a href="{{ route('vendor-prod-create', ['slug' => 'physical', 'mode' => 'pod']) }}"><span>{{ __('Upload New Design') }}</span></a>
+										@else
+										<a href="{{ route('vendor-prod-create', ['slug' => 'physical']) }}"><span>{{ __('Upload New Design') }}</span></a>
+										@endif
 									</li>
 									<li>
 										<a href="{{ route('vendor-prod-index') }}"><span>{{ __('All Designs') }}</span></a>
@@ -271,6 +301,13 @@
 	}
 </style>
 @endif
+
+<script>
+    // Force light mode only
+    const html = document.documentElement;
+    html.setAttribute('data-theme', 'light');
+    localStorage.setItem('theme', 'light');
+</script>
 
 	</body>
 

@@ -45,6 +45,7 @@
 
 		<?php echo $__env->yieldContent('styles'); ?>
 
+        <link href="<?php echo e(asset('assets/admin/css/theme.css')); ?>" rel="stylesheet" />
 	</head>
 	<body id="page-top">
 
@@ -54,8 +55,12 @@
 				<div class="header">
 					<div class="container-fluid">
 						<div class="d-flex mobile-menu-check justify-content-between">
-							<a class="admin-logo" href="<?php echo e(route('front.index')); ?>" target="_blank">
+							<a class="admin-logo" href="<?php echo e(route('front.index')); ?>" target="_blank" style="text-decoration: none;">
+                                <?php if(file_exists(base_path('../assets/images/'.$gs->logo))): ?>
 								<img src="<?php echo e(asset('assets/images/'.$gs->logo)); ?>" alt="">
+                                <?php else: ?>
+								<h3 class="text-white font-weight-bold mb-0" style="font-size: 24px;"><?php echo e($gs->title); ?></h3>
+                                <?php endif; ?>
 							</a>
 							<div class="menu-toggle-button">
 								<a class="nav-link" href="javascript:;" id="sidebarCollapse">
@@ -120,6 +125,8 @@
 										</div>
 									</li>
 
+
+
 									<li class="login-profile-area">
 										<a class="dropdown-toggle-1" href="javascript:;">
 											<div class="user-img">
@@ -153,9 +160,11 @@
 					<!-- Side Menu Area Start -->
 					<nav id="sidebar" class="nav-sidebar">
 						<ul class="list-unstyled components" id="accordion">
+                            <?php if(Auth::guard('admin')->user()->IsSuper() || Auth::guard('admin')->user()->sectionCheck('orders')): ?>
 							<li>
 								<a href="<?php echo e(route('admin.dashboard')); ?>" class="wave-effect"><i class="fa fa-home mr-2"></i><?php echo e(__('Dashboard')); ?></a>
 							</li>
+                            <?php endif; ?>
 							<?php if(Auth::guard('admin')->user()->IsSuper()): ?>
 								<?php echo $__env->make('partials.admin-role.super', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
@@ -246,6 +255,13 @@
 		margin-right: 5px;
 	}
 </style>
+
+<script>
+    // Force light mode only
+    const html = document.documentElement;
+    html.setAttribute('data-theme', 'light');
+    localStorage.setItem('theme', 'light');
+</script>
 
 	</body>
 

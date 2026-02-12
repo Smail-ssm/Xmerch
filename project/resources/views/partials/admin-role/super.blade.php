@@ -140,28 +140,53 @@
         <a href="{{ route('admin-coupon-index') }}" class=" wave-effect"><i class="fas fa-percentage"></i>{{ __('Discount Coupons') }}</a>
     </li>
 
+    @if(Auth::guard('admin')->user()->IsSuper() || Auth::guard('admin')->user()->sectionCheck('manufacturing'))
     <li class="nav-header">
-        <i class="fas fa-tools"></i> {{ __('Manufacturing') }}
+        <i class="fas fa-industry"></i> {{ __('Manufacturing') }}
     </li>
 
     <li>
-        <a href="{{ route('admin-printjob-index') }}">
-            <i class="fas fa-print"></i>
-            <span>{{ __('Print Queue Dashboard') }}</span>
+        <a href="#manufacturing" class="accordion-toggle wave-effect" data-toggle="collapse" aria-expanded="false">
+            <i class="fas fa-industry"></i>{{ __('Production Management') }}
         </a>
+        <ul class="collapse list-unstyled" id="manufacturing" data-parent="#accordion">
+            <li>
+                <a href="{{ route('admin-manufacturing-dashboard') }}"><span>{{ __('Dashboard') }}</span></a>
+            </li>
+            <li>
+                <a href="{{ route('admin-manufacturing-queue') }}"><span>{{ __('Manufacturing Queue') }}</span></a>
+            </li>
+            <li>
+                <a href="{{ route('admin-manufacturing-capacity') }}"><span>{{ __('Capacity Planning') }}</span></a>
+            </li>
+            <li>
+                <a href="{{ route('admin-manufacturing-schedule') }}"><span>{{ __('Production Schedule') }}</span></a>
+            </li>
+            <li>
+                <a href="{{ route('admin-manufacturing-quality') }}"><span>{{ __('Quality Control') }}</span></a>
+            </li>
+            <li>
+                <a href="{{ route('admin-manufacturing-analytics') }}"><span>{{ __('Analytics') }}</span></a>
+            </li>
+        </ul>
+    </li>
+    @endif
+
+    @if(Auth::guard('admin')->user()->IsSuper() || Auth::guard('admin')->user()->sectionCheck('print_production'))
+    <li class="nav-header">
+        <i class="fas fa-print"></i> {{ __('Print Production') }}
     </li>
 
-    @if(Auth::guard('admin')->user()->IsSuper() || Auth::guard('admin')->user()->sectionCheck('print_production') || Auth::guard('admin')->user()->sectionCheck('manufacturing'))
     <li>
         <a href="#printer" class="accordion-toggle wave-effect" data-toggle="collapse" aria-expanded="false">
-            <i class="fas fa-print"></i>{{ __('Print Production') }}
+            <i class="fas fa-print"></i>{{ __('Print Management') }}
         </a>
         <ul class="collapse list-unstyled" id="printer" data-parent="#accordion">
             <li>
                 <a href="{{ route('admin-printer-dashboard') }}"><span>{{ __('Dashboard') }}</span></a>
             </li>
             <li>
-                <a href="{{ route('admin-printer-queue') }}"><span>{{ __('Print Queue') }}</span></a>
+                <a href="{{ route('admin-printer-queue') }}"><span>{{ __('Printing Queue') }}</span></a>
             </li>
             <li>
                 <a href="{{ route('admin-printer-printing') }}"><span>{{ __('Currently Printing') }}</span></a>
@@ -177,9 +202,17 @@
                 <a href="{{ route('admin-printer-accounts') }}"><span>{{ __('Manage Accounts') }}</span></a>
             </li>
             @endif
+            <li class="nav-header" style="padding: 10px 15px; font-size: 11px; color: #888; background: rgba(0,0,0,0.05);">
+                {{ __('Advanced Tracking') }}
+            </li>
+            <li>
+                <a href="{{ route('admin-printjob-index') }}"><span>{{ __('Print Jobs (Items)') }}</span></a>
+            </li>
         </ul>
     </li>
     @endif
+
+
 
     <li class="nav-header">
         <i class="fas fa-users"></i> {{ __('CRM & Community') }}
@@ -401,6 +434,9 @@
             </li>
             <li>
                 <a href="{{ route('admin-gs-maintenance') }}"><span>{{ __('Website Maintenance') }}</span></a>
+            </li>
+            <li>
+                <a href="{{ route('admin-gs-pod-mode') }}"><span>{{ __('POD Designer Mode') }}</span></a>
             </li>
         </ul>
     </li>

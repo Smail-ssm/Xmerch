@@ -14,6 +14,11 @@ class SeoToolController extends AdminBaseController
     public function analytics()
     {
         $tool = Seotool::find(1);
+        if(!$tool) {
+            $tool = new Seotool();
+            $tool->id = 1;
+            $tool->save();
+        }
         return view('admin.seotool.googleanalytics',compact('tool'));
     }
 
@@ -39,6 +44,11 @@ class SeoToolController extends AdminBaseController
     public function keywords()
     {
         $tool = Seotool::find(1);
+        if(!$tool) {
+            $tool = new Seotool();
+            $tool->id = 1;
+            $tool->save();
+        }
         return view('admin.seotool.meta-keywords',compact('tool'));
     }
 

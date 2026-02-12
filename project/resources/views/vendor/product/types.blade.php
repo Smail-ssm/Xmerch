@@ -39,13 +39,24 @@
               <div class="ap-product-categories">
                 <div class="row">
                   @if($gs->physical == 1)
-                  <div class="col-lg-4">
-                    <a href="{{ route('vendor-prod-create','physical') }}">
+                  <div class="col-lg-3">
+                    <a href="{{ route('vendor-prod-create', ['slug' => 'physical', 'mode' => 'pod']) }}">
                     <div class="cat-box box1">
                       <div class="icon">
                         <i class="fas fa-tshirt"></i>
                       </div>
-                      <h5 class="title">{{ __("Physical") }} </h5>
+                      <h5 class="title">{{ __("Physical (Standard)") }} </h5>
+                    </div>
+                    </a>
+                  </div>
+
+                  <div class="col-lg-3">
+                    <a href="{{ route('vendor-prod-create', ['slug' => 'physical', 'mode' => 'pod']) }}">
+                    <div class="cat-box box4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                      <div class="icon">
+                        <i class="fas fa-paint-brush" style="color: white;"></i>
+                      </div>
+                      <h5 class="title" style="color: white;">{{ __("Print on Demand") }} </h5>
                     </div>
                     </a>
                   </div>

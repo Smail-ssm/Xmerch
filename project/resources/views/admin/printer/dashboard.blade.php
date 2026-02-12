@@ -200,7 +200,7 @@
                                 <tr class="{{ $isEligible ? 'table-success' : '' }}">
                                     <td>
                                         <strong>#{{ $order->order_number }}</strong>
-                                        @if($isEligible && $order->print_status == 'pending_print')
+                                        @if($isEligible && in_array($order->print_status, ['print_ready', 'pending_print']))
                                             <span class="badge badge-success"><i class="fas fa-rocket"></i></span>
                                         @endif
                                     </td>
@@ -216,7 +216,7 @@
                                         <a href="{{ route('admin-printer-show', $order->id) }}" class="action-btn view">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        @if($order->print_status == 'pending_print')
+                                        @if(in_array($order->print_status, ['print_ready', 'pending_print']))
                                         <a href="{{ route('admin-printer-start', $order->id) }}" class="action-btn start">
                                             <i class="fas fa-play"></i> Start
                                         </a>

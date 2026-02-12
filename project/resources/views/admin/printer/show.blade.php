@@ -331,7 +331,7 @@
 
                 {{-- Action Buttons --}}
                 <div class="action-buttons">
-                    @if($order->print_status == 'pending_print')
+                    @if(in_array($order->print_status, ['pending_print', 'print_ready', 'manufacturing']))
                     <a href="{{ route('admin-printer-start', $order->id) }}" class="btn-start">
                         <i class="fas fa-play"></i> Start Printing
                     </a>

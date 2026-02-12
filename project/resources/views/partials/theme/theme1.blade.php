@@ -9,7 +9,7 @@
 
 <header class="ecommerce-header nav-on-banner">
     {{-- Top header currency and Language --}}
-    @include('partials.global.top-header')
+    {{-- @include('partials.global.top-header') --}}
     {{-- Top header currency and Language  end--}}
     @include('partials.global.responsive-menubar')
 

@@ -88,6 +88,115 @@
                               </div>
                             </div>
 
+                        <hr>
+                        <h4 class="text-center">{{ __('Category Theme (Niche Branding)') }}</h4>
+                        <hr>
+
+                        <div class="row">
+                          <div class="col-lg-4">
+                            <div class="left-area">
+                                <h4 class="heading">{{ __('Primary Color') }}</h4>
+                            </div>
+                          </div>
+                          <div class="col-lg-7">
+                            <input type="color" name="theme_config[primary_color]" class="input-field" style="width: 100px; height: 40px; padding: 5px;" value="#000000">
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="col-lg-4">
+                            <div class="left-area">
+                                <h4 class="heading">{{ __('Background Color') }}</h4>
+                            </div>
+                          </div>
+                          <div class="col-lg-7">
+                            <input type="color" name="theme_config[bg_color]" class="input-field" style="width: 100px; height: 40px; padding: 5px;" value="#ffffff">
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="col-lg-4">
+                            <div class="left-area">
+                                <h4 class="heading">{{ __('Font Family') }}</h4>
+                                <p class="sub-heading">{{ __('(e.g. "Bangers", cursive)') }}</p>
+                            </div>
+                          </div>
+                          <div class="col-lg-7">
+                            <input type="text" name="theme_config[font_family]" class="input-field" placeholder="e.g. 'Bangers', cursive" value="">
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="col-lg-4">
+                            <div class="left-area">
+                                <h4 class="heading">{{ __('Font Value') }}</h4>
+                                <p class="sub-heading">{{ __('(Google Font Name)') }}</p>
+                            </div>
+                          </div>
+                          <div class="col-lg-7">
+                            <input type="text" name="theme_config[font_value]" class="input-field" placeholder="e.g. Bangers" value="">
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="col-lg-4">
+                            <div class="left-area">
+                                <h4 class="heading">{{ __('Global Styles') }}</h4>
+                                <p class="sub-heading">{{ __('(Body, Backgrounds, Global Fonts)') }}</p>
+                            </div>
+                          </div>
+                          <div class="col-lg-7">
+                            <textarea name="theme_config[global_css]" class="input-field" placeholder="e.g. body { background: #f0f0f0; }"></textarea>
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="col-lg-4">
+                            <div class="left-area">
+                                <h4 class="heading">{{ __('Header CSS') }}</h4>
+                                <p class="sub-heading">{{ __('(Navbar, Logo, Top Bar)') }}</p>
+                            </div>
+                          </div>
+                          <div class="col-lg-7">
+                            <textarea name="theme_config[header_css]" class="input-field" placeholder="e.g. .navbar { padding: 20px; }"></textarea>
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="col-lg-4">
+                            <div class="left-area">
+                                <h4 class="heading">{{ __('Product Card CSS') }}</h4>
+                                <p class="sub-heading">{{ __('(Items Grid, Image Borders, Price tags)') }}</p>
+                            </div>
+                          </div>
+                          <div class="col-lg-7">
+                            <textarea name="theme_config[product_card_css]" class="input-field" placeholder="e.g. .product-item { box-shadow: 10px 10px 0px #000; }"></textarea>
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="col-lg-4">
+                            <div class="left-area">
+                                <h4 class="heading">{{ __('Banner CSS') }}</h4>
+                                <p class="sub-heading">{{ __('(Main Category/Shop Banner overlay)') }}</p>
+                            </div>
+                          </div>
+                          <div class="col-lg-7">
+                            <textarea name="theme_config[banner_css]" class="input-field" placeholder="e.g. .banner-title { font-size: 50px; }"></textarea>
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="col-lg-4">
+                            <div class="left-area">
+                                <h4 class="heading">{{ __('Footer CSS') }}</h4>
+                            </div>
+                          </div>
+                          <div class="col-lg-7">
+                            <textarea name="theme_config[footer_css]" class="input-field" placeholder="e.g. .footer { border-top: 5px solid red; }"></textarea>
+                          </div>
+                        </div>
+
 
 
                           <br>

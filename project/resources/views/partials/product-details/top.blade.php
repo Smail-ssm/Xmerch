@@ -72,7 +72,7 @@
                                       <bdi><span class="woocommerce-Price-currencySymbol" id="sizeprice">{{ $productt->showPrice() }}</bdi>
                                   </span>
                                   <del class="ml-3"><small>{{ $productt->showPreviousPrice() }}</small></del>
-                                 <span class="on-sale"><span>{{ round($productt->offPercentage() )}}</span>% Off</span>
+                                 <span class="on-sale"><span>{{ round((double)$productt->offPercentage() )}}</span>% Off</span>
 
                               </p>
 

@@ -11,7 +11,7 @@ use DB;
 class Product extends Model
 {
 
-  protected $fillable = ['user_id','category_id','product_type','affiliate_link','sku', 'subcategory_id', 'childcategory_id', 'attributes', 'name', 'photo', 'size','size_qty','size_price', 'color', 'details','price','previous_price','stock','policy','status', 'views','tags','featured','best','top','hot','latest','big','trending','sale','features','colors','product_condition','ship','meta_tag','meta_description','youtube','type','file','license','license_qty','link','platform','region','licence_type','measure','discount_date','is_discount','whole_sell_qty','whole_sell_discount','catalog_id','slug','language_id','flash_count','hot_count','new_count','sale_count','best_seller_count','popular_count','top_rated_count','big_save_count','trending_count','page_count','seller_product_count','wishlist_count','vendor_page_count','min_price','max_price','product_page','post_count','minimum_qty','preordered','language_id','color_all','size_all','stock_check', 'production_cap', 'is_pod', 'print_file', 'design_data'];
+  protected $fillable = ['user_id','category_id','product_type','affiliate_link','sku', 'subcategory_id', 'childcategory_id', 'attributes', 'name', 'photo', 'size','size_qty','size_price', 'color', 'details','price','previous_price','stock','policy','status', 'views','tags','featured','best','top','hot','latest','big','trending','sale','features','colors','product_condition','ship','meta_tag','meta_description','youtube','type','file','license','license_qty','link','platform','region','licence_type','measure','discount_date','is_discount','whole_sell_qty','whole_sell_discount','catalog_id','slug','language_id','flash_count','hot_count','new_count','sale_count','best_seller_count','popular_count','top_rated_count','big_save_count','trending_count','page_count','seller_product_count','wishlist_count','vendor_page_count','min_price','max_price','product_page','post_count','minimum_qty','preordered','language_id','color_all','size_all','stock_check', 'production_cap', 'is_pod', 'print_file', 'design_data', 'mockup_template_id'];
 
     public $selectable = ['id','user_id','name','slug','features','colors','thumbnail','price','previous_price','attributes','size','size_price','discount_date','color_all','size_all','stock_check','category_id','details'];
 
@@ -623,9 +623,33 @@ class Product extends Model
         return $query->where('is_pod', 1);
     }
 
+    public function getMockupStyleAttribute()
+    {
+        if (!$this->is_pod || !$this->mockupTemplate) return null;
+
+        $template = $this->mockupTemplate;
+        $path = public_path('assets/images/mockups/' . $template->image);
+        
+        if (!file_exists($path)) return null;
+
+        list($width, $height) = getimagesize($path);
+
+        // Logic matching admin CSS: max-width: 500px; max-height: 500px;
+        $scale = min(1, 500 / $width, 500 / $height);
+        
+        $dispW = $width * $scale;
+        $dispH = $height * $scale;
+
+        $left = ($template->design_x / $dispW) * 100;
+        $top = ($template->design_y / $dispH) * 100;
+        $w = ($template->design_width / $dispW) * 100;
+        $h = ($template->design_height / $dispH) * 100;
+
+        return "top: {$top}%; left: {$left}%; width: {$w}%; height: {$h}%;";
+    }
+
     public function scopeTraditional($query)
     {
         return $query->where('is_pod', 0);
     }
-
 }

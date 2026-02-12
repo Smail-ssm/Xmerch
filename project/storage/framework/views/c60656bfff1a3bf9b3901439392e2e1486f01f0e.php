@@ -7,7 +7,7 @@
 
 <header class="ecommerce-header nav-on-banner">
     
-    <?php echo $__env->make('partials.global.top-header', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+    
     
     <?php echo $__env->make('partials.global.responsive-menubar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 

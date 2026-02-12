@@ -231,13 +231,35 @@ class ProductController extends AdminBaseController
             $input['file'] = $name;
         }
 
-        $image = $request->photo;
-        list($type, $image) = explode(';', $image);
-        list(, $image)      = explode(',', $image);
-        $image = base64_decode($image);
-        $image_name = time().Str::random(8).'.png';
-        $path = 'assets/images/products/'.$image_name;
-        file_put_contents($path, $image);
+        // Handle Photo (Supports both File and Base64)
+        $image_name = null;
+        if ($request->hasFile('photo')) {
+            $file = $request->file('photo');
+            $image_name = \PriceHelper::ImageCreateName($file);
+            $file->move('assets/images/products', $image_name);
+        } elseif ($request->filled('photo')) {
+            $image = $request->photo;
+            if (strpos($image, ';base64,') !== false) {
+                try {
+                    $image_parts = explode(";base64,", $image);
+                    $image_base64 = base64_decode($image_parts[1]);
+                    $image_name = time().Str::random(8).'.png';
+                    file_put_contents('assets/images/products/'.$image_name, $image_base64);
+                } catch (\Exception $e) {
+                     return response()->json(['errors' => ['Image Processing Error: ' . $e->getMessage()]]);
+                }
+            } else {
+                if(strlen($image) > 0 && strlen($image) < 255) {
+                    $image_name = $image;
+                }
+            }
+        }
+
+        if (!$image_name) {
+            $keys = implode(', ', array_keys($request->all()));
+            return response()->json(array('errors' => [ 0 => __("The photo field is required. Keys: [{$keys}]")]));
+        }
+
         $input['photo'] = $image_name;
 
         // POD Configuration

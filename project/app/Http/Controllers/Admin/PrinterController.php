@@ -19,24 +19,22 @@ class PrinterController extends Controller
      */
     public function dashboard()
     {
-        $pendingOrders = Order::pendingPrint()->where('status', 'processing')->get();
-        $eligibleCount = 0;
-        foreach ($pendingOrders as $order) {
-            if ($order->isEligibleForProduction()) {
-                $eligibleCount++;
-            }
-        }
-
+        // Get print-ready orders (completed manufacturing, waiting for printer)
+        $printReadyOrders = Order::printReady()->where('status', 'processing')->get();
+        
         $stats = [
-            'pending' => $pendingOrders->count(),
-            'eligible' => $eligibleCount,
+            'in_manufacturing' => Order::manufacturing()->where('status', 'processing')->count(),
+            'pending' => Order::pendingPrint()->where('status', 'processing')->count(),
+            'eligible' => $printReadyOrders->count(),
+            'print_ready' => $printReadyOrders->count(),
             'printing' => Order::printing()->count(),
             'printed' => Order::printed()->count(),
             'shipped_today' => Order::shippedPrint()->whereDate('shipped_at', today())->count(),
         ];
 
+        // Show print_ready and printing orders
         $recentOrders = Order::where('status', 'processing')
-            ->whereIn('print_status', ['pending_print', 'printing'])
+            ->whereIn('print_status', ['print_ready', 'printing'])
             ->orderBy('created_at', 'asc')
             ->take(10)
             ->get();
@@ -49,8 +47,9 @@ class PrinterController extends Controller
      */
     public function queue()
     {
+        // Show orders that are either in manufacturing or ready for printer
         $orders = Order::where('status', 'processing')
-            ->pendingPrint()
+            ->whereIn('print_status', [Order::PRINT_STATUS_MANUFACTURING, Order::PRINT_STATUS_PRINT_READY, Order::PRINT_STATUS_PENDING])
             ->orderBy('created_at', 'asc')
             ->paginate(20);
 
@@ -145,34 +144,40 @@ class PrinterController extends Controller
         return redirect()->back()->with('success', 'Order marked as shipped');
     }
 
-    /**
-     * Batch start printing
-     */
     public function batchStartPrint(Request $request)
     {
-        $ids = $request->input('order_ids', []);
+        $ids = $request->input('order_ids');
+        if (is_string($ids)) {
+            $ids = json_decode($ids, true);
+        }
         
-        Order::whereIn('id', $ids)->update([
-            'print_status' => Order::PRINT_STATUS_PRINTING,
-            'printer_id' => Auth::guard('admin')->id()
-        ]);
+        if (!empty($ids)) {
+            Order::whereIn('id', $ids)->update([
+                'print_status' => Order::PRINT_STATUS_PRINTING,
+                'printer_id' => Auth::guard('admin')->id()
+            ]);
+            return redirect()->back()->with('success', count($ids) . ' orders marked as printing');
+        }
 
-        return redirect()->back()->with('success', count($ids) . ' orders marked as printing');
+        return redirect()->back()->with('error', 'No orders selected');
     }
 
-    /**
-     * Batch mark printed
-     */
     public function batchMarkPrinted(Request $request)
     {
-        $ids = $request->input('order_ids', []);
+        $ids = $request->input('order_ids');
+        if (is_string($ids)) {
+            $ids = json_decode($ids, true);
+        }
         
-        Order::whereIn('id', $ids)->update([
-            'print_status' => Order::PRINT_STATUS_PRINTED,
-            'printed_at' => now()
-        ]);
+        if (!empty($ids)) {
+            Order::whereIn('id', $ids)->update([
+                'print_status' => Order::PRINT_STATUS_PRINTED,
+                'printed_at' => now()
+            ]);
+            return redirect()->back()->with('success', count($ids) . ' orders marked as printed');
+        }
 
-        return redirect()->back()->with('success', count($ids) . ' orders marked as printed');
+        return redirect()->back()->with('error', 'No orders selected');
     }
 
     /**

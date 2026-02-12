@@ -45,6 +45,7 @@
 
 		@yield('styles')
 
+        <link href="{{asset('assets/admin/css/theme.css')}}" rel="stylesheet" />
 	</head>
 	<body id="page-top">
 
@@ -54,8 +55,12 @@
 				<div class="header">
 					<div class="container-fluid">
 						<div class="d-flex mobile-menu-check justify-content-between">
-							<a class="admin-logo" href="{{ route('front.index') }}" target="_blank">
+							<a class="admin-logo" href="{{ route('front.index') }}" target="_blank" style="text-decoration: none;">
+                                @if(file_exists(base_path('../assets/images/'.$gs->logo)))
 								<img src="{{asset('assets/images/'.$gs->logo)}}" alt="">
+                                @else
+								<h3 class="text-white font-weight-bold mb-0" style="font-size: 24px;">{{$gs->title}}</h3>
+                                @endif
 							</a>
 							<div class="menu-toggle-button">
 								<a class="nav-link" href="javascript:;" id="sidebarCollapse">
@@ -120,6 +125,8 @@
 										</div>
 									</li>
 
+
+
 									<li class="login-profile-area">
 										<a class="dropdown-toggle-1" href="javascript:;">
 											<div class="user-img">
@@ -153,9 +160,11 @@
 					<!-- Side Menu Area Start -->
 					<nav id="sidebar" class="nav-sidebar">
 						<ul class="list-unstyled components" id="accordion">
+                            @if(Auth::guard('admin')->user()->IsSuper() || Auth::guard('admin')->user()->sectionCheck('orders'))
 							<li>
 								<a href="{{ route('admin.dashboard') }}" class="wave-effect"><i class="fa fa-home mr-2"></i>{{ __('Dashboard') }}</a>
 							</li>
+                            @endif
 							@if(Auth::guard('admin')->user()->IsSuper())
 								@include('partials.admin-role.super')
 
@@ -246,6 +255,13 @@
 		margin-right: 5px;
 	}
 </style>
+
+<script>
+    // Force light mode only
+    const html = document.documentElement;
+    html.setAttribute('data-theme', 'light');
+    localStorage.setItem('theme', 'light');
+</script>
 
 	</body>
 

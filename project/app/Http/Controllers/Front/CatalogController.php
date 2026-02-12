@@ -19,8 +19,8 @@ class CatalogController extends FrontBaseController
 
     public function categories()
     {
-
-        return view('frontend.products');
+        $data['prods'] = Product::whereStatus(1)->latest('id')->paginate($this->gs->page_count ?? 12);
+        return view('frontend.products', $data); 
     }
 
     // -------------------------------- CATEGORY SECTION ----------------------------------------

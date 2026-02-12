@@ -121,6 +121,24 @@
                                        <textarea class="input-field form-control border" name="address" placeholder="{{ __('Address') }}" cols="30" rows="10" required>{{ $user->address }}</textarea>
                                     </div>
                                  </div>
+                                  <div class="row mb-4 align-items-center">
+                                      <div class="col-lg-12">
+                                          <div class="card border p-3 bg-light">
+                                              <div class="d-flex justify-content-between align-items-center text-dark">
+                                                  <div>
+                                                      <h6 class="mb-1">{{ __('Theme Preference') }}</h6>
+                                                      <p class="text-muted mb-0 small">{{ __('Switch between Dark and Light mode') }}</p>
+                                                  </div>
+                                                  <div class="theme-chooser-profile" style="cursor: pointer;" id="profile-theme-toggle">
+                                                      <button type="button" class="btn btn-outline-primary btn-sm d-flex align-items-center px-3">
+                                                          <i class="fas fa-moon me-2"></i>
+                                                          <span>{{ __('Toggle Theme') }}</span>
+                                                      </button>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
                                  <div class="form-links">
                                     <button class="submit-btn btn btn-primary" type="submit">{{ __('Save') }}</button>
                                  </div>

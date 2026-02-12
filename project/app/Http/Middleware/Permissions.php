@@ -16,8 +16,13 @@ class Permissions
             if(Auth::guard('admin')->user()->role_id == 0){
                 return redirect()->route('admin.dashboard')->with('unsuccess',"You don't have access to that section"); 
             }
-            if (Auth::guard('admin')->user()->sectionCheck($data)){
-                return $next($request);
+            
+            // Support multiple permissions with OR logic (separator: |)
+            $permissions = explode('|', $data);
+            foreach($permissions as $permission) {
+                if (Auth::guard('admin')->user()->sectionCheck(trim($permission))){
+                    return $next($request);
+                }
             }
         }
         return redirect()->route('admin.dashboard')->with('unsuccess',"You don't have access to that section"); 

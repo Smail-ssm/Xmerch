@@ -39,6 +39,13 @@ class MockupPreview {
         this.dragStart = { x: 0, y: 0 };
         this.initialState = null;
         
+        // Drawing State
+        this.isDrawingMode = false;
+        this.currentDrawPath = []; // Array of {x, y}
+        this.drawColor = '#000000';
+        this.drawWidth = 5;
+        this.isDrawing = false;
+        
         // Templates
         this.templates = {};
         this.currentTemplateId = null;
@@ -52,6 +59,23 @@ class MockupPreview {
         this.render();
     }
     
+    // --- DRAWING API ---
+    toggleDrawingMode(enable) {
+        this.isDrawingMode = enable;
+        this.canvas.style.cursor = enable ? 'crosshair' : 'default';
+        this.selectedLayerIndex = -1;
+        this.render();
+        this.updateLayersPanel();
+    }
+    
+    setDrawColor(color) {
+        this.drawColor = color;
+    }
+    
+    setDrawWidth(width) {
+        this.drawWidth = parseInt(width);
+    }
+
     init() {
         this.canvas = document.getElementById(this.canvasId);
         if (!this.canvas) return;
@@ -177,6 +201,75 @@ class MockupPreview {
             this.updateLayersPanel();
         }
     }
+
+    /**
+     * Remap layers from old print area to new print area
+     */
+    /**
+     * Remap layers from old print area to new print area
+     */
+    remapLayers(oldArea, newArea) {
+        console.log('[RemapLayers] Start', { old: oldArea, new: newArea });
+        if (!oldArea || !newArea) {
+            console.warn('[RemapLayers] Missing area definitions');
+            return;
+        }
+
+        ['front', 'back', 'left', 'right'].forEach(view => {
+            if(!this.views[view]) return;
+            
+            this.views[view].layers.forEach((layer, i) => {
+                // Calculate relative position (0-1)
+                const relX = (layer.x - oldArea.x) / oldArea.width;
+                const relY = (layer.y - oldArea.y) / oldArea.height;
+                const relWidth = layer.type === 'image' ? (layer.width / oldArea.width) : 0;
+                const relFontSize = layer.type === 'text' ? (layer.fontSize / oldArea.width) : 0;
+
+                console.log(`[Remap] Layer ${i} (${view}):`, { 
+                    x: layer.x, relX, 
+                    targetX: newArea.x + (relX * newArea.width) 
+                });
+
+                // Map to new
+                layer.x = newArea.x + (relX * newArea.width);
+                layer.y = newArea.y + (relY * newArea.height);
+
+                if (layer.type === 'image') {
+                    const ratio = layer.width / layer.height;
+                    layer.width = relWidth * newArea.width;
+                    layer.height = layer.width / ratio;
+                } else if (layer.type === 'text') {
+                    layer.fontSize = relFontSize * newArea.width;
+                }
+            });
+        });
+        this.render();
+    }
+
+    /**
+     * Scale all layers by a factor (Fallback)
+     */
+    scaleLayers(factor) {
+        if (!factor || factor === 1) return;
+        ['front', 'back', 'left', 'right'].forEach(view => {
+            this.views[view].layers.forEach(layer => {
+                layer.x *= factor;
+                layer.y *= factor;
+                if (layer.type === 'image') {
+                    layer.width *= factor;
+                    layer.height *= factor;
+                } else if (layer.type === 'text') {
+                    layer.fontSize *= factor;
+                } else if (layer.type === 'drawing') {
+                     if (layer.width) layer.width *= factor; 
+                     if (layer.points) {
+                        layer.points.forEach(p => { p.x *= factor; p.y *= factor; });
+                     }
+                }
+            });
+        });
+        this.render();
+    }
     
     /**
      * Switch view (front/back/left/right)
@@ -288,12 +381,6 @@ class MockupPreview {
                 if (v === 'left' && template.leftUrl) url = template.leftUrl;
                 if (v === 'right' && template.rightUrl) url = template.rightUrl;
                 
-                // If no specific url found for this view (and it's not the default one), skip
-                // Actually, if we try to load 'left' but have no url, we should probably handle it gracefully.
-                // But for now, let's assume if it's in the list, we try to load it. 
-                // Using a placeholder or the default url might be confusing if it's the wrong image.
-                // Our template config has specific keys, so checking keys is good.
-                
                 img.onload = () => {
                     this.views[v].templateImage = img;
                     
@@ -314,7 +401,15 @@ class MockupPreview {
             });
         });
         
-        return Promise.all(promises);
+        return Promise.all(promises).then(() => {
+            // After all views loaded, ensure current view is rendered with correct size
+            const currentTemplate = this.getCurrentTemplate();
+            if (currentTemplate && this.canvas) {
+                this.canvas.width = currentTemplate.width;
+                this.canvas.height = currentTemplate.height;
+                this.render();
+            }
+        });
     }
     
     /**
@@ -358,14 +453,33 @@ class MockupPreview {
             if (!isWhite) {
                 this.ctx.save();
                 
-                // A. 'multiply' blend mode:Colors the white parts, preserves black shadows
-                this.ctx.globalCompositeOperation = 'multiply';
-                this.ctx.fillStyle = this.productColor;
-                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                const isDark = this.productColor === '#000000' || this.productColor === 'black' || this.productColor === '#0f172a';
                 
-                // B. 'destination-in' blend mode: 
-                // Uses the original image alpha channel to clip the result,
-                // ensuring we don't color the transparent background.
+                if (isDark) {
+                     // 1. Texture-Preserving Black Tint
+                     // Instead of pure black (which crushes all detail), use a charcoal grey (#333333)
+                     // This allows the shadows of the original mockup (which are darker) to still be visible
+                     this.ctx.globalCompositeOperation = 'multiply';
+                     this.ctx.fillStyle = '#363636'; 
+                     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                     
+                     // 2. Highlight Recovery (Simulate sheen/texture on black fabric)
+                     // We draw the original white shirt again with 'screen' blend mode at low opacity.
+                     // This converts the white/grey areas of the mockup into subtle highlights on the black base.
+                     this.ctx.globalCompositeOperation = 'screen';
+                     this.ctx.globalAlpha = 0.15; // Subtle variation
+                     this.ctx.drawImage(template, 0, 0, this.canvas.width, this.canvas.height);
+                     
+                     this.ctx.globalAlpha = 1.0; // Reset
+                } else {
+                    // Standard tinting for colors
+                    this.ctx.globalCompositeOperation = 'multiply';
+                    this.ctx.fillStyle = this.productColor;
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                }
+                
+                // Clip to transparency of original image
+                // Use 'destination-in' to ensure everything we just drew is masked by the shirt shape
                 this.ctx.globalCompositeOperation = 'destination-in';
                 this.ctx.drawImage(template, 0, 0, this.canvas.width, this.canvas.height);
                 
@@ -381,8 +495,72 @@ class MockupPreview {
                 this.drawImageLayer(layer, isSelected);
             } else if (layer.type === 'text') {
                 this.drawTextLayer(layer, isSelected);
+            } else if (layer.type === 'drawing') {
+                this.drawDrawingLayer(layer, isSelected);
             }
         });
+        
+        // Draw live path being drawn
+        if (this.isDrawing && this.currentDrawPath.length > 0) {
+            this.ctx.save();
+            this.ctx.lineJoin = 'round';
+            this.ctx.lineCap = 'round';
+            this.ctx.strokeStyle = this.drawColor;
+            this.ctx.lineWidth = this.drawWidth;
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.currentDrawPath[0].x, this.currentDrawPath[0].y);
+            for (let i = 1; i < this.currentDrawPath.length; i++) {
+                this.ctx.lineTo(this.currentDrawPath[i].x, this.currentDrawPath[i].y);
+            }
+            this.ctx.stroke();
+            this.ctx.restore();
+        }
+    }
+
+    drawDrawingLayer(layer, isSelected) {
+        if (!layer.points || layer.points.length === 0) return;
+        
+        this.ctx.save();
+        this.ctx.globalAlpha = layer.opacity || 1;
+        
+        // Apply transformations if we support moving drawings later (x,y offset)
+        // For now, drawings are absolute on canvas mostly, unless we group them.
+        // But to allow moving, we should treat points relative to an origin (layer.x, layer.y).
+        // Simplest implementation: Points are absolute. Moving them shifts all points.
+        const originX = layer.x || 0;
+        const originY = layer.y || 0;
+        
+        this.ctx.translate(originX, originY);
+        if (layer.rotation) {
+             // Rotation logic would require a center pivot. Complex for freehand. Skipping rotation for drawings for now.
+        }
+        
+        this.ctx.lineJoin = 'round';
+        this.ctx.lineCap = 'round';
+        this.ctx.strokeStyle = layer.color;
+        this.ctx.lineWidth = layer.width;
+        
+        this.ctx.beginPath();
+        this.ctx.moveTo(layer.points[0].x, layer.points[0].y);
+        for (let i = 1; i < layer.points.length; i++) {
+            this.ctx.lineTo(layer.points[i].x, layer.points[i].y);
+        }
+        this.ctx.stroke();
+        
+        this.ctx.restore();
+        
+        if (isSelected) {
+            // Calculate bounding box for selection
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            layer.points.forEach(p => {
+                if (p.x < minX) minX = p.x;
+                if (p.x > maxX) maxX = p.x;
+                if (p.y < minY) minY = p.y;
+                if (p.y > maxY) maxY = p.y;
+            });
+            // Draw simplified selection box
+            this.drawHandles(minX + originX, minY + originY, maxX - minX, maxY - minY);
+        }
     }
     
     drawImageLayer(layer, isSelected) {
@@ -533,8 +711,18 @@ class MockupPreview {
         const mx = e.clientX - rect.left;
         const my = e.clientY - rect.top;
         
+        // DRAWING MODE
+        if (this.isDrawingMode) {
+            this.isDrawing = true;
+            this.currentDrawPath = [{x: mx, y: my}];
+            return;
+        }
+        
+        // SELECT MODE
         // Check if clicking on a layer
         const layers = this.getCurrentLayers();
+        let clicked = false;
+        
         for (let i = layers.length - 1; i >= 0; i--) {
             const layer = layers[i];
             let x, y, width, height;
@@ -547,15 +735,37 @@ class MockupPreview {
                 height = layer.fontSize;
                 x = layer.x - width/2;
                 y = layer.y - height/2;
+            } else if (layer.type === 'drawing') {
+                 // Simple bounding box hit test for now
+                 let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                 if(layer.points) {
+                    layer.points.forEach(p => {
+                        if (p.x < minX) minX = p.x;
+                        if (p.x > maxX) maxX = p.x;
+                        if (p.y < minY) minY = p.y;
+                        if (p.y > maxY) maxY = p.y;
+                    });
+                    x = (layer.x||0) + minX;
+                    y = (layer.y||0) + minY;
+                    width = maxX - minX;
+                    height = maxY - minY;
+                 }
             }
             
             if (mx >= x && mx <= x + width && my >= y && my <= y + height) {
                 this.selectedLayerIndex = i;
+                clicked = true;
                 this.render();
                 this.updateLayersPanel();
                 this.updateTextPanel();
                 break;
             }
+        }
+        
+        if (!clicked) {
+            this.selectedLayerIndex = -1;
+            this.render();
+            this.updateLayersPanel();
         }
         
         this.activeHandle = this.getHandle(mx, my);
@@ -579,9 +789,17 @@ class MockupPreview {
         const mx = e.clientX - rect.left;
         const my = e.clientY - rect.top;
         
+        // DRAWING MODE
+        if (this.isDrawingMode && this.isDrawing) {
+            this.currentDrawPath.push({x: mx, y: my});
+            this.render();
+            return;
+        }
+        
         if (!this.isDragging && !this.isResizing && !this.isRotating) {
             const handle = this.getHandle(mx, my);
-            if (handle === 'rotate') this.canvas.style.cursor = 'crosshair';
+            if (this.isDrawingMode) this.canvas.style.cursor = 'crosshair';
+            else if (handle === 'rotate') this.canvas.style.cursor = 'crosshair';
             else if (handle && handle.startsWith('resize')) this.canvas.style.cursor = 'nwse-resize';
             else if (handle === 'drag') this.canvas.style.cursor = 'move';
             else this.canvas.style.cursor = 'default';
@@ -596,12 +814,9 @@ class MockupPreview {
         const dy = my - this.dragStart.y;
         
         if (this.isDragging) {
-            if (layer.type === 'image') {
-                layer.x = this.initialState.x + dx;
-                layer.y = this.initialState.y + dy;
-            } else if (layer.type === 'text') {
-                layer.x = this.initialState.x + dx;
-                layer.y = this.initialState.y + dy;
+            if (layer.type === 'image' || layer.type === 'text' || layer.type === 'drawing') {
+                layer.x = (this.initialState.x || 0) + dx;
+                layer.y = (this.initialState.y || 0) + dy;
             }
         } else if (this.isResizing && layer.type === 'image') {
             const aspectRatio = layer.image.width / layer.image.height;
@@ -626,6 +841,27 @@ class MockupPreview {
     }
     
     handleMouseUp() {
+        if (this.isDrawingMode && this.isDrawing) {
+            this.isDrawing = false;
+            // Save path as layer
+            if (this.currentDrawPath.length > 2) {
+                const layer = {
+                    type: 'drawing',
+                    points: [...this.currentDrawPath], // Clone
+                    color: this.drawColor,
+                    width: this.drawWidth,
+                    x: 0, // Initial offset
+                    y: 0,
+                    opacity: 1
+                };
+                this.getCurrentLayers().push(layer);
+                this.selectedLayerIndex = this.getCurrentLayers().length - 1;
+                this.updateLayersPanel();
+            }
+            this.currentDrawPath = [];
+            this.render();
+        }
+    
         this.isDragging = false;
         this.isResizing = false;
         this.isRotating = false;
@@ -744,7 +980,23 @@ class MockupPreview {
      * @param {number} scale - Multiplier for high resolution (default 5x = 2000px width)
      * @returns {Promise<{print: string, mockup: string}>}
      */
-    async exportDesign(scale = 5) {
+    /**
+     * Export the design as images with progress reporting
+     * @param {number} scale - Scale factor
+     * @param {function} onProgress - Callback (message, percent)
+     * @returns {Promise<{print: string, mockup: string}>}
+     */
+    async exportDesign(scale = 5, onProgress = null) {
+        const report = async (msg, pct) => {
+            if (onProgress) {
+                onProgress(msg, pct);
+                // Yield to UI thread to allow DOM update
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+        };
+
+        await report('Initializing High-Res Canvas...', 10);
+
         const originalWidth = this.canvas.width;
         const originalHeight = this.canvas.height;
         const exportWidth = originalWidth * scale;
@@ -757,6 +1009,7 @@ class MockupPreview {
         const expCtx = expCanvas.getContext('2d');
         
         // 1. Generate Print File (Design only, transparent background)
+        await report('Rendering Print File...', 30);
         expCtx.clearRect(0, 0, exportWidth, exportHeight);
         
         const layers = this.getCurrentLayers();
@@ -779,9 +1032,6 @@ class MockupPreview {
                 expCtx.translate(-centerX, -centerY);
                 expCtx.drawImage(layer.image, x, y, width, height);
             } else if (layer.type === 'text') {
-                // For text, layer.x and layer.y are already the anchor
-                expCtx.translate(x * scale / layer.x, y * scale / layer.y); // Scale translation
-                // Wait, it's easier:
                 expCtx.setTransform(1, 0, 0, 1, 0, 0); // Reset
                 const tx = layer.x * scale;
                 const ty = layer.y * scale;
@@ -815,13 +1065,44 @@ class MockupPreview {
             expCtx.restore();
         });
         
+        await report('Compressing Print File...', 50);
         const printData = expCanvas.toDataURL('image/png');
         
         // 2. Generate Mockup (Template + Design)
+        await report('Rendering Product Mockup...', 70);
         expCtx.clearRect(0, 0, exportWidth, exportHeight);
         const template = this.getCurrentTemplate();
         if (template) {
+            // Draw base template
             expCtx.drawImage(template, 0, 0, exportWidth, exportHeight);
+            
+            // Apply Product Color Tinting
+            const isWhite = !this.productColor || 
+                           this.productColor === '#ffffff' || 
+                           this.productColor === 'white' || 
+                           this.productColor === 'transparent';
+
+            if (!isWhite) {
+                expCtx.save();
+                const isDark = this.productColor === '#000000' || this.productColor === 'black' || this.productColor === '#0f172a';
+                if (isDark) {
+                     expCtx.globalCompositeOperation = 'multiply';
+                     expCtx.fillStyle = '#363636'; 
+                     expCtx.fillRect(0, 0, exportWidth, exportHeight);
+                     
+                     expCtx.globalCompositeOperation = 'screen';
+                     expCtx.globalAlpha = 0.15; 
+                     expCtx.drawImage(template, 0, 0, exportWidth, exportHeight);
+                     expCtx.globalAlpha = 1.0; 
+                } else {
+                    expCtx.globalCompositeOperation = 'multiply';
+                    expCtx.fillStyle = this.productColor;
+                    expCtx.fillRect(0, 0, exportWidth, exportHeight);
+                }
+                expCtx.globalCompositeOperation = 'destination-in';
+                expCtx.drawImage(template, 0, 0, exportWidth, exportHeight);
+                expCtx.restore();
+            }
         }
         
         // Re-draw layers on top of template
@@ -861,7 +1142,10 @@ class MockupPreview {
             expCtx.restore();
         });
         
+        await report('Compressing Mockup Image...', 90);
         const mockupData = expCanvas.toDataURL('image/png');
+        
+        await report('Finalizing...', 100);
         
         return {
             print: printData,

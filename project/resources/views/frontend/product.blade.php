@@ -111,7 +111,7 @@
                                                         <ins>{{ App\Models\Product::whereId($prod['id'])->first()->showPrice() }}</ins>
                                                         <del>{{ App\Models\Product::whereId($prod['id'])->first()->showPreviousPrice() }}</del>
                                                     </div>
-                                                    <div class="on-sale"><span>{{ round(App\Models\Product::whereId($prod['id'])->first()->offPercentage())}}</span><span>% off</span></div>
+                                                    <div class="on-sale"><span>{{ round((double)App\Models\Product::whereId($prod['id'])->first()->offPercentage())}}</span><span>% off</span></div>
                                                 </div>
                                                 <div class="shipping-feed-back">
                                                     <div class="star-rating">
@@ -158,7 +158,7 @@
                         <div class="product-wrapper">
                            <div class="product-image">
                               <a href="{{ route('front.product', $item->slug) }}" class="woocommerce-LoopProduct-link"><img class="lazy" data-src="{{ $item->photo ? asset('assets/images/products/'.$item->photo):asset('assets/images/noimage.png')}}" alt="Product Image"></a>
-                              <div class="on-sale">-{{ round(App\Models\Product::find($item->id)->offPercentage()),2}}%</div>
+                              <div class="on-sale">-{{ round((double)App\Models\Product::find($item->id)->offPercentage())}}%</div>
                               <div class="hover-area">
                                  @if($item->product_type == "affiliate")
                                  <div class="cart-button">

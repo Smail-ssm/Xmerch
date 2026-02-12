@@ -20,6 +20,6 @@ class Vendor
                 return $next($request);
             }
         }
-        return redirect()->back();
+        return redirect()->route('vendor.login');
     }
 }

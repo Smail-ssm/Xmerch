@@ -1,6 +1,6 @@
 <div class="dashboard-overlay">&nbsp;</div>
 <div id="sidebar" class="sidebar-blog bg-light p-30">
-  <div class="dashbaord-sidebar-close d-xl-none">
+  <div class="dashbaord-sidebar-close d-xl-none text-dark">
     <i class="fas fa-times"></i>
   </div>
     <div class="widget border-0 py-0 widget_categories">

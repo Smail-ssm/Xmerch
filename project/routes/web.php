@@ -440,6 +440,62 @@ Route::delete('/state/delete/{id}', 'Admin\StateController@delete')->name('admin
 
   //------------ ADMIN PRINTER SECTION ENDS------------
 
+  //------------ ADMIN MANUFACTURING SECTION ------------
+
+  Route::group(['middleware'=>'permissions:manufacturing'],function(){
+
+    Route::get('/manufacturing', 'Admin\\ManufacturingController@dashboard')->name('admin-manufacturing-dashboard');
+    Route::get('/manufacturing/capacity', 'Admin\\ManufacturingController@capacity')->name('admin-manufacturing-capacity');
+    Route::get('/manufacturing/schedule', 'Admin\\ManufacturingController@schedule')->name('admin-manufacturing-schedule');
+    Route::get('/manufacturing/quality', 'Admin\\ManufacturingController@quality')->name('admin-manufacturing-quality');
+    Route::get('/manufacturing/analytics', 'Admin\\ManufacturingController@analytics')->name('admin-manufacturing-analytics');
+    Route::get('/manufacturing/queue', 'Admin\\ManufacturingController@queue')->name('admin-manufacturing-queue');
+    Route::get('/manufacturing/printers', 'Admin\\ManufacturingController@printers')->name('admin-manufacturing-printers');
+    Route::post('/manufacturing/capacity/update/{id}', 'Admin\\ManufacturingController@updateCapacity')->name('admin-manufacturing-capacity-update');
+    
+    // Manufacturing Order Actions
+    Route::get('/manufacturing/order/{id}', 'Admin\\ManufacturingController@showOrder')->name('admin-manufacturing-show');
+    Route::get('/manufacturing/mark-ready/{id}', 'Admin\\ManufacturingController@markPrintReady')->name('admin-manufacturing-mark-ready');
+    Route::post('/manufacturing/batch-ready', 'Admin\\ManufacturingController@batchMarkPrintReady')->name('admin-manufacturing-batch-ready');
+
+  });
+
+  //------------ ADMIN MANUFACTURING SECTION ENDS------------
+
+  //------------ ADMIN PRINT JOB SECTION (Line-Item Tracking) ------------
+
+  Route::group(['middleware'=>'permissions:print_production'],function(){
+
+    // Dashboard & Views
+    Route::get('/printjobs', 'Admin\PrintJobController@index')->name('admin-printjob-index');
+    Route::get('/printjobs/queue', 'Admin\PrintJobController@queue')->name('admin-printjob-queue');
+    Route::get('/printjobs/printing', 'Admin\PrintJobController@printing')->name('admin-printjob-printing');
+    Route::get('/printjobs/completed', 'Admin\PrintJobController@completed')->name('admin-printjob-completed');
+    Route::get('/printjobs/failed', 'Admin\PrintJobController@failed')->name('admin-printjob-failed');
+
+    // DataTables
+    Route::get('/printjobs/datatables/{status}', 'Admin\PrintJobController@datatables')->name('admin-printjob-datatables');
+
+    // Capacity Stats (JSON)
+    Route::get('/printjobs/capacity/stats', 'Admin\PrintJobController@capacityStats')->name('admin-printjob-capacity');
+
+    // Job Details
+    Route::get('/printjobs/{id}', 'Admin\PrintJobController@show')->name('admin-printjob-show');
+
+    // Job Actions
+    Route::post('/printjobs/{id}/start', 'Admin\PrintJobController@start')->name('admin-printjob-start');
+    Route::post('/printjobs/{id}/complete', 'Admin\PrintJobController@complete')->name('admin-printjob-complete');
+    Route::post('/printjobs/{id}/fail', 'Admin\PrintJobController@fail')->name('admin-printjob-fail');
+    Route::post('/printjobs/{id}/hold', 'Admin\PrintJobController@hold')->name('admin-printjob-hold');
+    Route::post('/printjobs/{id}/resume', 'Admin\PrintJobController@resume')->name('admin-printjob-resume');
+    Route::post('/printjobs/{id}/assign', 'Admin\PrintJobController@assign')->name('admin-printjob-assign');
+
+    // Bulk Actions
+    Route::post('/printjobs/bulk', 'Admin\PrintJobController@bulkAction')->name('admin-printjob-bulk');
+
+  });
+
+  //------------ ADMIN PRINT JOB SECTION ENDS------------
 
 
 
@@ -623,6 +679,7 @@ Route::delete('/state/delete/{id}', 'Admin\StateController@delete')->name('admin
   Route::get('/general-settings/popup', 'Admin\GeneralSettingController@popup')->name('admin-gs-popup');
   Route::get('/general-settings/breadcrumb', 'Admin\GeneralSettingController@breadcrumb')->name('admin-gs-bread');
   Route::get('/general-settings/maintenance', 'Admin\GeneralSettingController@maintain')->name('admin-gs-maintenance');
+  Route::get('/general-settings/pod-mode', 'Admin\GeneralSettingController@pod_mode')->name('admin-gs-pod-mode');
 
 // Deal Of The Day
 

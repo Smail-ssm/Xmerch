@@ -31,7 +31,13 @@
             <div class="col">
                 <div class="footer-widget my-5">
                     <div class="footer-logo mb-4">
-                        <a href="{{ route('front.index') }}"><img class="lazy" data-src="{{ asset('assets/images/'.$gs->footer_logo) }}" alt="Image not found!" /></a>
+                        <a href="{{ route('front.index') }}">
+                            @if(file_exists(base_path('../assets/images/'.$gs->footer_logo)))
+                            <img src="{{asset('assets/images/'.$gs->footer_logo)}}" alt="{{ $gs->title }}">
+                            @else
+                            <h3 class="text-secondary font-weight-bold" style="font-family: 'Jost', sans-serif;">{{ $gs->title }}</h3>
+                            @endif
+                        </a>
                     </div>
                     <div class="widget-ecommerce-contact">
                         @if($ps->phone != null)

@@ -44,7 +44,19 @@ class LoginController extends Controller
       // Attempt to log the user in
       if (Auth::guard('admin')->attempt(['email' => $request->email, 'password' => $request->password], $request->remember)) {
         // if successful, then redirect to their intended location
-        return response()->json(route('admin.dashboard'));
+        $user = Auth::guard('admin')->user();
+        $redirectUrl = route('admin.dashboard');
+
+        if(!$user->IsSuper()) {
+            if($user->sectionCheck('print_production') && !$user->sectionCheck('orders')) {
+                $redirectUrl = route('admin-printer-dashboard');
+            }
+            elseif($user->sectionCheck('manufacturing') && !$user->sectionCheck('orders')) {
+                $redirectUrl = route('admin-manufacturing-dashboard');
+            }
+        }
+
+        return response()->json($redirectUrl);
       }
 
       // if unsuccessful, then redirect back to the login with the form data

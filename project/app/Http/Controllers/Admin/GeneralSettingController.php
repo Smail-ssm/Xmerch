@@ -59,6 +59,9 @@ class GeneralSettingController extends AdminBaseController
     public function popup(){
         return view('admin.generalsetting.popup');
     }
+    public function pod_mode(){
+        return view('admin.generalsetting.pod_mode');
+    }
     public function breadcrumb(){
         return view('admin.generalsetting.breadcrumb');
     }

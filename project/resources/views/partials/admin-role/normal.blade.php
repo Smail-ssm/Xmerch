@@ -4,7 +4,7 @@
     $user = Auth::guard('admin')->user();
     $hasSalesAccess = $user->sectionCheck('orders') || $user->sectionCheck('earning') || $user->sectionCheck('customer_deposits');
     $hasInventoryAccess = $user->sectionCheck('categories') || $user->sectionCheck('products') || $user->sectionCheck('affilate_products') || $user->sectionCheck('bulk_product_upload') || $user->sectionCheck('set_coupons');
-    $hasManufacturingAccess = $user->sectionCheck('print_production');
+    $hasManufacturingAccess = $user->sectionCheck('print_production') || $user->sectionCheck('manufacturing');
 @endphp
 
 @if($hasSalesAccess)
@@ -158,21 +158,22 @@
     @endif
 @endif
 
-@if($hasManufacturingAccess)
+{{-- Printer Section (print_production permission) --}}
+@if($user->sectionCheck('print_production'))
     <li class="nav-header">
-        <i class="fas fa-tools"></i> {{ __('Manufacturing') }}
+        <i class="fas fa-print"></i> {{ __('Print Production') }}
     </li>
 
     <li>
         <a href="#printer" class="accordion-toggle wave-effect" data-toggle="collapse" aria-expanded="false">
-            <i class="fas fa-print"></i>{{ __('Print Production') }}
+            <i class="fas fa-print"></i>{{ __('Printer Dashboard') }}
         </a>
         <ul class="collapse list-unstyled" id="printer" data-parent="#accordion">
             <li>
                 <a href="{{ route('admin-printer-dashboard') }}"><span>{{ __('Dashboard') }}</span></a>
             </li>
             <li>
-                <a href="{{ route('admin-printer-queue') }}"><span>{{ __('Print Queue') }}</span></a>
+                <a href="{{ route('admin-printer-queue') }}"><span>{{ __('Printing Queue') }}</span></a>
             </li>
             <li>
                 <a href="{{ route('admin-printer-printing') }}"><span>{{ __('Currently Printing') }}</span></a>
@@ -182,6 +183,46 @@
             </li>
             <li>
                 <a href="{{ route('admin-printer-shipped') }}"><span>{{ __('Shipped') }}</span></a>
+            </li>
+            <li class="nav-header" style="padding: 10px 15px; font-size: 11px; color: #888;">
+                {{ __('Advanced Tracking') }}
+            </li>
+            <li>
+                <a href="{{ route('admin-printjob-index') }}"><span>{{ __('Print Jobs (Items)') }}</span></a>
+            </li>
+        </ul>
+    </li>
+@endif
+
+
+{{-- Manufacturing Section (manufacturing permission) --}}
+@if($user->sectionCheck('manufacturing'))
+    <li class="nav-header">
+        <i class="fas fa-industry"></i> {{ __('Manufacturing') }}
+    </li>
+
+    <li>
+        <a href="#manufacturing" class="accordion-toggle wave-effect" data-toggle="collapse" aria-expanded="false">
+            <i class="fas fa-industry"></i>{{ __('Production Management') }}
+        </a>
+        <ul class="collapse list-unstyled" id="manufacturing" data-parent="#accordion">
+            <li>
+                <a href="{{ route('admin-manufacturing-dashboard') }}"><span>{{ __('Dashboard') }}</span></a>
+            </li>
+            <li>
+                <a href="{{ route('admin-manufacturing-capacity') }}"><span>{{ __('Capacity Planning') }}</span></a>
+            </li>
+            <li>
+                <a href="{{ route('admin-manufacturing-schedule') }}"><span>{{ __('Production Schedule') }}</span></a>
+            </li>
+            <li>
+                <a href="{{ route('admin-manufacturing-quality') }}"><span>{{ __('Quality Control') }}</span></a>
+            </li>
+            <li>
+                <a href="{{ route('admin-manufacturing-analytics') }}"><span>{{ __('Analytics') }}</span></a>
+            </li>
+            <li>
+                <a href="{{ route('admin-manufacturing-queue') }}"><span>{{ __('Manufacturing Queue') }}</span></a>
             </li>
         </ul>
     </li>

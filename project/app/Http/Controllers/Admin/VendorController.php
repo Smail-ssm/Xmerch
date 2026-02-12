@@ -125,6 +125,9 @@ class VendorController extends AdminBaseController
 
         $user = User::findOrFail($id);
         $data = $request->all();
+        if ($request->has('theme_config')) {
+            $data['theme_config'] = json_encode($request->theme_config);
+        }
         $user->update($data);
         $msg = 'Vendor Information Updated Successfully.';
         return response()->json($msg);   

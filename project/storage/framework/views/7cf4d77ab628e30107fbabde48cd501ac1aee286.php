@@ -31,7 +31,13 @@
             <div class="col">
                 <div class="footer-widget my-5">
                     <div class="footer-logo mb-4">
-                        <a href="<?php echo e(route('front.index')); ?>"><img class="lazy" data-src="<?php echo e(asset('assets/images/'.$gs->footer_logo)); ?>" alt="Image not found!" /></a>
+                        <a href="<?php echo e(route('front.index')); ?>">
+                            <?php if(file_exists(base_path('../assets/images/'.$gs->footer_logo))): ?>
+                            <img src="<?php echo e(asset('assets/images/'.$gs->footer_logo)); ?>" alt="<?php echo e($gs->title); ?>">
+                            <?php else: ?>
+                            <h3 class="text-secondary font-weight-bold" style="font-family: 'Jost', sans-serif;"><?php echo e($gs->title); ?></h3>
+                            <?php endif; ?>
+                        </a>
                     </div>
                     <div class="widget-ecommerce-contact">
                         <?php if($ps->phone != null): ?>

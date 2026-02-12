@@ -86,8 +86,7 @@ class ProductController extends VendorBaseController
     }
 
     public function types(){
-        // POD Optimization: Skip type selection and go directly to design upload
-        return redirect()->route('vendor-prod-create', 'physical');
+        return view('vendor.product.types');
     }
 
     public function catalogs(){
@@ -97,11 +96,19 @@ class ProductController extends VendorBaseController
     //*** GET Request
     public function create($slug)
     {
+        // \Log::info("ProductController::create called with slug: " . $slug);
+        
+        $slug = strtolower($slug);
         $cats = Category::all();
         $sign = $this->curr;
         if($slug == 'physical'){
             if($this->gs->physical == 1){
-                return view('vendor.product.create.physical',compact('cats','sign'));
+                $shippings = \App\Models\Shipping::all();
+                $packages = \App\Models\Package::all();
+                if (request()->has('mode') && request()->query('mode') == 'pod') {
+                    return view('vendor.product.create.physical',compact('cats','sign','shippings','packages'));
+                }
+                return view('vendor.product.create.physical_standard',compact('cats','sign','shippings','packages'));
             }else{
                 return back();
             }
@@ -120,6 +127,7 @@ class ProductController extends VendorBaseController
             }
             
         }
+        return abort(404);
     }
 
     //*** GET Request
@@ -387,7 +395,7 @@ class ProductController extends VendorBaseController
 
         //--- Validation Section
         $rules = [
-               'photo'      => 'required',
+               'photo'      => 'nullable',
                'file'       => 'mimes:zip'
                 ];
 
@@ -414,13 +422,42 @@ class ProductController extends VendorBaseController
                 $input['file'] = $name;
             }
 
-            $image = $request->photo;
-            list($type, $image) = explode(';', $image);
-            list(, $image)      = explode(',', $image);
-            $image = base64_decode($image);
-            $image_name = time().Str::random(8).'.png';
-            $path = 'assets/images/products/'.$image_name;
-            file_put_contents($path, $image);
+            // Handle Photo (Supports both File and Base64)
+            $image_name = null;
+            
+            if ($request->hasFile('photo')) {
+                // Case 1: Standard File Upload
+                $file = $request->file('photo');
+                $image_name = \PriceHelper::ImageCreateName($file);
+                $file->move('assets/images/products', $image_name);
+            } elseif ($request->filled('photo')) {
+                // Case 2: Base64 or Filename String
+                $image = $request->photo;
+                if (strpos($image, ';base64,') !== false) {
+                    try {
+                        $image_parts = explode(";base64,", $image);
+                        $image_base64 = base64_decode($image_parts[1]);
+                        $image_name = time().Str::random(8).'.png';
+                        file_put_contents('assets/images/products/'.$image_name, $image_base64);
+                    } catch (\Exception $e) {
+                         return response()->json(['errors' => ['Image Processing Error: ' . $e->getMessage()]]);
+                    }
+                } else {
+                    // It's a string but not base64 (maybe a filename from a hidden field)
+                    if(strlen($image) > 0 && strlen($image) < 255) {
+                        $image_name = $image;
+                    }
+                }
+            }
+
+            if (!$image_name) {
+                $keys = implode(', ', array_keys($request->all()));
+                $debug_msg = "The photo field is required. Keys: [{$keys}]";
+                if (!$request->has('photo')) $debug_msg .= " (Field 'photo' missing from POST)";
+                elseif (empty($request->photo)) $debug_msg .= " (Field 'photo' is present but empty)";
+                return response()->json(array('errors' => [ 0 => __($debug_msg)]));
+            }
+            
             $input['photo'] = $image_name;
 
             // Handle POD Print File and Design Data
@@ -494,7 +531,7 @@ class ProductController extends VendorBaseController
                $input['color'] = null;
            }
            else{
-                   if(in_array(null, $request->size) || in_array(null, $request->size_qty) || in_array(null, $request->size_price))
+                   if(!is_array($request->size) || !is_array($request->size_qty) || !is_array($request->size_price) || in_array(null, $request->size) || in_array(null, $request->size_qty) || in_array(null, $request->size_price))
                    {
                        $input['stock_check'] = 0;
                        $input['size'] = null;
@@ -518,22 +555,21 @@ class ProductController extends VendorBaseController
                    }
            }
 
-           // Check Color
-           if(empty($request->color_check))
-           {
-               $input['color_all'] = null;
-           }
-           else{
-               $input['color_all'] = implode(',', $request->color_all);
-           }
-           // Check Size
-           if(empty($request->size_check))
-           {
-               $input['size_all'] = null;
-           }
-           else{
-               $input['size_all'] = implode(',', $request->size_all);
-           }
+            if(empty($request->color_check) || !is_array($request->color_all))
+            {
+                $input['color_all'] = null;
+            }
+            else{
+                $input['color_all'] = implode(',', $request->color_all);
+            }
+            // Check Size
+            if(empty($request->size_check) || !is_array($request->size_all))
+            {
+                $input['size_all'] = null;
+            }
+            else{
+                $input['size_all'] = implode(',', $request->size_all);
+            }
 
             // Check Whole Sale
             if(empty($request->whole_check ))
@@ -542,7 +578,7 @@ class ProductController extends VendorBaseController
                 $input['whole_sell_discount'] = null;
             }
             else{
-                if(in_array(null, $request->whole_sell_qty) || in_array(null, $request->whole_sell_discount))
+                if(!is_array($request->whole_sell_qty) || !is_array($request->whole_sell_discount) || in_array(null, $request->whole_sell_qty) || in_array(null, $request->whole_sell_discount))
                 {
                 $input['whole_sell_qty'] = null;
                 $input['whole_sell_discount'] = null;
@@ -554,8 +590,7 @@ class ProductController extends VendorBaseController
                 }
             }
 
-            // Check Color
-            if(empty($request->color_check))
+            if(empty($request->color_check) || !is_array($request->color))
             {
                 $input['color'] = null;
             }
@@ -589,7 +624,7 @@ class ProductController extends VendorBaseController
             if($request->type == "License")
             {
 
-                if(in_array(null, $request->license) || in_array(null, $request->license_qty))
+                if(!is_array($request->license) || !is_array($request->license_qty) || in_array(null, $request->license) || in_array(null, $request->license_qty))
                 {
                     $input['license'] = null;
                     $input['license_qty'] = null;
@@ -603,7 +638,7 @@ class ProductController extends VendorBaseController
             }
 
              // Check Features
-            if(in_array(null, $request->features) || in_array(null, $request->colors))
+            if(!is_array($request->features) || !is_array($request->colors) || in_array(null, $request->features) || in_array(null, $request->colors))
             {
                 $input['features'] = null;
                 $input['colors'] = null;
@@ -620,9 +655,15 @@ class ProductController extends VendorBaseController
                 $input['tags'] = implode(',', $request->tags);
              }
 
-            // Conert Price According to Currency
-             $input['price'] = ($input['price'] / $sign->value);
-             $input['previous_price'] = ($input['previous_price'] / $sign->value);
+            // Convert Price According to Currency
+            if (isset($input['price'])) {
+                $input['price'] = ($input['price'] / $sign->value);
+            }
+            if (isset($input['previous_price'])) {
+                $input['previous_price'] = ($input['previous_price'] / $sign->value);
+            } else {
+                $input['previous_price'] = 0;
+            }
          	 $input['user_id'] = $this->user->id;
 
            // store filtering attributes for physical product
@@ -730,6 +771,28 @@ class ProductController extends VendorBaseController
                     }
                 }
         //logic Section Ends
+
+        // Handle Base64 Gallery Images (POD)
+        if ($request->filled('gallery') && is_array($request->gallery)) {
+            foreach ($request->gallery as $image) {
+                if (is_string($image) && strpos($image, ';base64,') !== false) {
+                    try {
+                        $image_parts = explode(";base64,", $image);
+                        $image_base64 = base64_decode($image_parts[1]);
+                        $image_name = time().Str::random(8).'.png';
+                        file_put_contents('assets/images/galleries/'.$image_name, $image_base64);
+
+                        $gallery = new Gallery;
+                        $gallery['photo'] = $image_name;
+                        $gallery['product_id'] = $lastid;
+                        $gallery->save();
+                    } catch (\Exception $e) {
+                         // Silent fail
+                    }
+                }
+            }
+        }
+
 
         //--- Redirect Section
         $msg = __('New Product Added Successfully.').'<a href="'.route('vendor-prod-index').'">'.__('View Product Lists.').'</a>';
@@ -885,7 +948,7 @@ class ProductController extends VendorBaseController
                          $input['color'] = null;
                      }
                      else{
-                             if(in_array(null, $request->size) || in_array(null, $request->size_qty) || in_array(null, $request->size_price))
+                             if(!is_array($request->size) || !is_array($request->size_qty) || !is_array($request->size_price) || in_array(null, $request->size) || in_array(null, $request->size_qty) || in_array(null, $request->size_price))
                              {
                                  $input['stock_check'] = 0;
                                  $input['size'] = null;
@@ -987,7 +1050,7 @@ class ProductController extends VendorBaseController
         if($data->type == "License")
         {
 
-        if(!in_array(null, $request->license) && !in_array(null, $request->license_qty))
+        if(!is_array($request->license) || !is_array($request->license_qty) || in_array(null, $request->license) || in_array(null, $request->license_qty))
         {
             $input['license'] = implode(',,', $request->license);
             $input['license_qty'] = implode(',', $request->license_qty);
@@ -1010,7 +1073,7 @@ class ProductController extends VendorBaseController
 
         }
             // Check Features
-            if(!in_array(null, $request->features) && !in_array(null, $request->colors))
+            if(is_array($request->features) && is_array($request->colors) && !in_array(null, $request->features) && !in_array(null, $request->colors))
             {
                     $input['features'] = implode(',', str_replace(',',' ',$request->features));
                     $input['colors'] = implode(',', str_replace(',',' ',$request->colors));
@@ -1227,7 +1290,7 @@ class ProductController extends VendorBaseController
                 $input['size_price'] = null;
             }
             else{
-                    if(in_array(null, $request->size) || in_array(null, $request->size_qty))
+                    if(!is_array($request->size) || !is_array($request->size_qty) || in_array(null, $request->size) || in_array(null, $request->size_qty))
                     {
                         $input['size'] = null;
                         $input['size_qty'] = null;
@@ -1254,7 +1317,7 @@ class ProductController extends VendorBaseController
                 $input['whole_sell_discount'] = null;
             }
             else{
-                if(in_array(null, $request->whole_sell_qty) || in_array(null, $request->whole_sell_discount))
+                if(!is_array($request->whole_sell_qty) || !is_array($request->whole_sell_discount) || in_array(null, $request->whole_sell_qty) || in_array(null, $request->whole_sell_discount))
                 {
                 $input['whole_sell_qty'] = null;
                 $input['whole_sell_discount'] = null;
@@ -1302,7 +1365,7 @@ class ProductController extends VendorBaseController
             if($request->type == "License")
             {
 
-                if(in_array(null, $request->license) || in_array(null, $request->license_qty))
+                if(!is_array($request->license) || !is_array($request->license_qty) || in_array(null, $request->license) || in_array(null, $request->license_qty))
                 {
                     $input['license'] = null;
                     $input['license_qty'] = null;
@@ -1316,7 +1379,7 @@ class ProductController extends VendorBaseController
             }
 
              // Check Features
-            if(in_array(null, $request->features) || in_array(null, $request->colors))
+            if(!is_array($request->features) || !is_array($request->colors) || in_array(null, $request->features) || in_array(null, $request->colors))
             {
                 $input['features'] = null;
                 $input['colors'] = null;
@@ -1333,10 +1396,16 @@ class ProductController extends VendorBaseController
                 $input['tags'] = implode(',', $request->tags);
              }
 
-            // Conert Price According to Currency
-             $input['price'] = ($input['price'] / $sign->value);
-             $input['previous_price'] = ($input['previous_price'] / $sign->value);
-             $input['user_id'] = $this->user->id;
+            // Convert Price According to Currency
+            if (isset($input['price'])) {
+                $input['price'] = ($input['price'] / $sign->value);
+            }
+            if (isset($input['previous_price'])) {
+                $input['previous_price'] = ($input['previous_price'] / $sign->value);
+            } else {
+                $input['previous_price'] = 0;
+            }
+            $input['user_id'] = $this->user->id;
 
              // store filtering attributes for physical product
              $attrArr = [];

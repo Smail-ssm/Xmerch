@@ -73,7 +73,8 @@ class PaymentGateway extends Model
         }else if($data == 'paymee'){
             $link = route('front.paymee.submit');
         }else if($data == 'd17'){
-            $link = route('front.d17.submit');
+            // D17 not yet implemented - fallback to manual payment
+            $link = route('front.manual.submit');
         }else{
             $link = route('front.manual.submit');
         }

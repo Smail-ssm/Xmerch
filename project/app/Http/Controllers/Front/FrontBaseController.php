@@ -70,6 +70,47 @@ class FrontBaseController extends Controller
             Session::put('popup' , 1);
 
 
+            // Niche Theme Resolution
+            $active_theme = null;
+            $route = $request->route();
+
+            if ($route) {
+                $params = $route->parameters();
+                $category_slug = isset($params['category']) ? $params['category'] : null;
+                $product_slug = isset($params['slug']) ? $params['slug'] : null;
+
+                // 1. Check if Category Page
+                if ($category_slug) {
+                    $cat = DB::table('categories')->where('slug', $category_slug)->first();
+                    if ($cat && !empty($cat->theme_config)) {
+                        $active_theme = json_decode($cat->theme_config);
+                    }
+                }
+                // 2. Check if Product Page
+                elseif ($request->is('item/*') || $request->routeIs('front.product')) {
+                    $product_slug = $product_slug ?? $request->route('slug');
+                    $product = DB::table('products')->where('slug', $product_slug)->first();
+                    if ($product) {
+                        $cat = DB::table('categories')->where('id', $product->category_id)->first();
+                        if ($cat && !empty($cat->theme_config)) {
+                            $active_theme = json_decode($cat->theme_config);
+                        }
+                    }
+                }
+                // 3. Check if Vendor Page
+                elseif ($request->routeIs('front.vendor')) {
+                    $vendor_slug = $request->route('slug');
+                    $vendor_name = str_replace('-', ' ', $vendor_slug);
+                    $vendor = DB::table('users')->where('shop_name', $vendor_name)->where('is_vendor', 2)->first();
+                    if ($vendor && !empty($vendor->theme_config)) {
+                        $active_theme = json_decode($vendor->theme_config);
+                    }
+                }
+            }
+
+            view()->share('active_theme', $active_theme);
+
+
             return $next($request);
         });
 

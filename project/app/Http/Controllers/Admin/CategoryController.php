@@ -83,6 +83,10 @@ class CategoryController extends AdminBaseController
             $input['image'] = $name;
         }
 
+        if ($request->has('theme_config')) {
+            $input['theme_config'] = json_encode($request->theme_config);
+        }
+
         $data->fill($input)->save();
         //--- Logic Section Ends
 
@@ -143,6 +147,10 @@ class CategoryController extends AdminBaseController
                 $input['image'] = $name;
             }
 
+
+        if ($request->has('theme_config')) {
+            $input['theme_config'] = json_encode($request->theme_config);
+        }
 
         $data->update($input);
         //--- Logic Section Ends

@@ -190,7 +190,7 @@
 
       	$(function() {
         $(".btn-area").append('<div class="col-sm-4 table-contents">'+
-        	'<a class="add-btn" href="{{route('vendor-prod-types')}}">'+
+        	'<a class="add-btn" href="{{ $gs->pod_designer_mode == 1 ? route('vendor-prod-create', ['slug' => 'physical', 'mode' => 'pod']) : route('vendor-prod-create', ['slug' => 'physical']) }}">'+
           '<i class="fas fa-plus"></i> <span class="remove-mobile">{{ __("Upload New Design") }}<span>'+
           '</a>'+
           '</div>');

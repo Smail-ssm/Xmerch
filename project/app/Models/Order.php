@@ -9,14 +9,19 @@ class Order extends Model
 {
     /**
      * Print status constants for POD
+     * Flow: manufacturing → print_ready → printing → printed → shipped
      */
-    const PRINT_STATUS_PENDING = 'pending_print';
+    const PRINT_STATUS_MANUFACTURING = 'manufacturing';
+    const PRINT_STATUS_PRINT_READY = 'print_ready';
+    const PRINT_STATUS_PENDING = 'pending_print'; // Legacy - kept for compatibility
     const PRINT_STATUS_PRINTING = 'printing';
     const PRINT_STATUS_PRINTED = 'printed';
     const PRINT_STATUS_SHIPPED = 'shipped';
 
     public static $printStatuses = [
-        'pending_print' => 'Pending Print',
+        'manufacturing' => 'In Manufacturing',
+        'print_ready' => 'Print Ready',
+        'pending_print' => 'Pending Print', // Legacy
         'printing' => 'Printing',
         'printed' => 'Printed',
         'shipped' => 'Shipped'
@@ -30,11 +35,27 @@ class Order extends Model
     ];
 
     /**
-     * Scope for pending print orders
+     * Scope for orders in manufacturing
+     */
+    public function scopeManufacturing($query)
+    {
+        return $query->where('print_status', self::PRINT_STATUS_MANUFACTURING);
+    }
+
+    /**
+     * Scope for print ready orders (ready for printer)
+     */
+    public function scopePrintReady($query)
+    {
+        return $query->where('print_status', self::PRINT_STATUS_PRINT_READY);
+    }
+
+    /**
+     * Scope for pending print orders (legacy)
      */
     public function scopePendingPrint($query)
     {
-        return $query->where('print_status', self::PRINT_STATUS_PENDING);
+        return $query->whereIn('print_status', [self::PRINT_STATUS_MANUFACTURING, self::PRINT_STATUS_PENDING]);
     }
 
     /**
@@ -108,7 +129,7 @@ class Order extends Model
             // Count total items of this product in all pending orders
             $totalPending = 0;
             $pendingOrders = Order::where('status', 'processing')
-                ->where('print_status', Order::PRINT_STATUS_PENDING)
+                ->whereIn('print_status', [Order::PRINT_STATUS_MANUFACTURING, Order::PRINT_STATUS_PENDING])
                 ->get();
 
             foreach ($pendingOrders as $pOrder) {
@@ -148,7 +169,7 @@ class Order extends Model
                 if (isset($item['item']['id'])) {
                     $product = \App\Models\Product::find($item['item']['id']);
                     if ($product && $product->is_pod && $product->print_file) {
-                        return asset('assets/images/products/' . $product->print_file);
+                        return asset('assets/files/designs/' . $product->print_file);
                     }
                 }
             }
@@ -172,7 +193,7 @@ class Order extends Model
                 if (isset($item['item']['id'])) {
                     $product = \App\Models\Product::find($item['item']['id']);
                     if ($product && $product->is_pod && $product->print_file) {
-                        return public_path('assets/images/products/' . $product->print_file);
+                        return public_path('assets/files/designs/' . $product->print_file);
                     }
                 }
             }

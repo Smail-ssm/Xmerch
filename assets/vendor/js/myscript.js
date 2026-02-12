@@ -494,6 +494,12 @@ if(admin_loader == 1)
   // NORMAL FORM
 
   $(document).on('submit','#geniusform',function(e){
+    // Skip this handler for POD products (they have custom async export logic)
+    if ($(this).find('input[name="is_pod"]').val() == '1') {
+      console.log('[myscript.js] Skipping generic AJAX handler for POD product');
+      return; // Let the custom POD handler in physical.blade.php handle it
+    }
+    
     e.preventDefault();
     if(admin_loader == 1)
     {

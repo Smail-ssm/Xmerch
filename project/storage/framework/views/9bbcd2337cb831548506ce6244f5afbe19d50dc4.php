@@ -1,9 +1,15 @@
 <div class="main-nav d-lg-block d-none py-3">
     <div class="container-fluid px-lg-5">
         <div class="row">
-            <div class="col-xl-7 col-md-9">
+            <div class="col-xl-5 col-md-8">
                 <nav class="navbar navbar-expand-lg nav-dark nav-primary-hover nav-line-active">
-                    <a class="navbar-brand" href="<?php echo e(route('front.index')); ?>"><img class="nav-logo lazy" data-src="<?php echo e(asset('assets/images/'.$gs->logo)); ?>" alt="Image not found !"></a>
+                    <a class="navbar-brand" href="<?php echo e(route('front.index')); ?>">
+                        <?php if(file_exists(base_path('../assets/images/'.$gs->logo))): ?>
+                        <img src="<?php echo e(asset('assets/images/'.$gs->logo)); ?>" alt="<?php echo e($gs->title); ?>">
+                        <?php else: ?>
+                        <h2 class="text-primary font-weight-bold" style="letter-spacing: 1px; font-family: 'Jost', sans-serif;"><?php echo e($gs->title); ?></h2>
+                        <?php endif; ?>
+                    </a>
                     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <i class="flaticon-menu-2 flat-small text-primary"></i>
                     </button>
@@ -59,8 +65,12 @@
                     </div>
                 </nav>
             </div>
-            <div class="col-xl-5 col-md-3">
+            <div class="col-xl-7 col-md-4">
                 <div class="margin-right-1 d-flex align-items-center justify-content-end h-100">
+                    
+                     <!-- Moved Top Header Items -->
+
+
                     <div class="product-search-one flex-grow-1 global-search touch-screen-view">
                         <form id="searchForm" class="search-form form-inline search-pill-shape" action="<?php echo e(route('front.category', [Request::route('category'),Request::route('subcategory'),Request::route('childcategory')])); ?>" method="GET">
 
@@ -94,12 +104,63 @@
                     <div class="autocomplete">
                         <div id="myInputautocomplete-list" class="autocomplete-items"></div>
                     </div>
+                    
+                     <!-- Moved Top Header Items (Post-Search) -->
+                     <div class="d-none d-xl-flex align-items-center ms-3 me-3 header-integrated-items">
+                         
+                        <div class="language-selector nice-select p-0 border-0 bg-transparent me-2" style="height:auto; min-height:auto; display:flex; align-items:center;">
+                              <i class="fas fa-globe-americas me-1 text-muted"></i>
+                              <select name="language" class="language selectors nice bg-transparent border-0">
+                              <?php $__currentLoopData = DB::table('languages')->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $language): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                              <option value="<?php echo e(route('front.language',$language->id)); ?>" <?php echo e(Session::has('language') ? ( Session::get('language') == $language->id ? 'selected' : '' ) : (DB::table('languages')->where('is_default','=',1)->first()->id == $language->id ? 'selected' : '')); ?> >
+                              <?php echo e($language->language); ?>
+
+                              </option>
+                              <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                              </select>
+                        </div>
+
+
+                        
+
+                        
+                        <?php if($gs->reg_vendor == 1): ?>
+                           <div class="sell-btn-wrapper d-flex align-items-center">
+                              <?php if(Auth::check()): ?>
+                                 <?php if(Auth::guard('web')->user()->is_vendor == 2): ?>
+                                 <a href="<?php echo e(route('vendor.dashboard')); ?>" class="btn btn-sm btn-primary rounded-pill px-3 py-1 font-12 fw-bold"> <?php echo e(__('Sell')); ?></a>
+                                 <?php else: ?>
+                                 <a href="<?php echo e(route('user-package')); ?>" class="btn btn-sm btn-primary rounded-pill px-3 py-1 font-12 fw-bold"> <?php echo e(__('Sell')); ?></a>
+                                 <?php endif; ?>
+                              <?php else: ?>
+                                 <a href="<?php echo e(route('vendor.login')); ?>" class="btn btn-sm btn-primary rounded-pill px-3 py-1 font-12 fw-bold"> <?php echo e(__('Sell')); ?></a>
+                              <?php endif; ?>
+                           </div>
+                        <?php endif; ?>
+
+                     </div>
+
                     <div class="sign-in my-account-dropdown position-relative">
-                        <a href="my-account.html" class="has-dropdown d-flex align-items-center text-white text-decoration-none">
-                            <?php if(Auth::check()): ?>
-                            <img class="img-fluid user lazy" data-src="<?php echo e(asset('assets/images/users/'.Auth::user()->photo)); ?>" alt="">
+                        <a href="my-account.html" class="has-dropdown d-flex align-items-center text-decoration-none">
+                            <?php if(Auth::check() && !empty(trim(Auth::user()->photo))): ?>
+                            <img class="img-fluid user lazy" data-src="<?php echo e(asset('assets/images/users/'.Auth::user()->photo)); ?>" alt="" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
+                            <?php elseif(Auth::check()): ?>
+                            <?php
+                                $name = Auth::user()->name ?: 'User';
+                                $nameParts = explode(' ', trim($name));
+                                $initials = '';
+                                if (count($nameParts) >= 2) {
+                                    $initials = strtoupper(substr($nameParts[0], 0, 1) . substr($nameParts[count($nameParts)-1], 0, 1));
+                                } else {
+                                    $initials = strtoupper(substr($name, 0, 2));
+                                }
+                            ?>
+                            <div class="user-initials-badge" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--theme-dark-color); font-weight: 600; font-size: 13px; font-family: var(--theme-general-font);">
+                                <?php echo e($initials); ?>
+
+                            </div>
                             <?php else: ?>
-                            <i class="flaticon-user-3 flat-mini mx-auto text-dark"></i>
+                            <i class="fas fa-user-circle" style="font-size: 30px;"></i>
                             <?php endif; ?>
                         </a>
                         <ul class="my-account-popup">
@@ -122,24 +183,24 @@
                     </div>
                     <div class="search-view d-xxl-none">
                         <a href="#" class="search-pop top-quantity d-flex align-items-center text-decoration-none">
-                            <i class="flaticon-search flat-mini text-dark mx-auto"></i>
+                            <i class="flaticon-search flat-mini mx-auto"></i>
                         </a>
                     </div>
                     <div class="header-cart-1">
                         <?php if(Auth::check()): ?>
                         <a href="<?php echo e(route('user-wishlists')); ?>" class="cart " title="View Wishlist">
-                            <div class="cart-icon"><i class="flaticon-like flat-mini mx-auto text-dark"></i> <span class="header-cart-count " id="wishlist-count"><?php echo e(Auth::user()->wishlistCount()); ?></span></div>
+                            <div class="cart-icon"><i class="flaticon-like flat-mini mx-auto"></i> <span class="header-cart-count " id="wishlist-count"><?php echo e(Auth::user()->wishlistCount()); ?></span></div>
                         </a>
                         <?php else: ?>
                         <a href="<?php echo e(route('user.login')); ?>" class="cart " title="View Wishlist">
-                        <div class="cart-icon"><i class="flaticon-like flat-mini mx-auto text-dark"></i> <span class="header-cart-count" id="wishlist-count"><?php echo e(0); ?></span></div>
+                        <div class="cart-icon"><i class="flaticon-like flat-mini mx-auto"></i> <span class="header-cart-count" id="wishlist-count"><?php echo e(0); ?></span></div>
                         </a>
                     <?php endif; ?>
                     </div>
 
                     <div class="header-cart-1">
                         <a href="<?php echo e(route('product.compare')); ?>" class="cart " title="Compare">
-                            <div class="cart-icon"><i class="flaticon-shuffle flat-mini mx-auto text-dark"></i> <span class="header-cart-count " id="compare-count"><?php echo e(Session::has('compare') ? count(Session::get('compare')->items) : '0'); ?></span></div>
+                            <div class="cart-icon"><i class="flaticon-shuffle flat-mini mx-auto"></i> <span class="header-cart-count " id="compare-count"><?php echo e(Session::has('compare') ? count(Session::get('compare')->items) : '0'); ?></span></div>
                         </a>
                     </div>
 
@@ -173,9 +234,9 @@
 
                                 <div class="login-signup bg-secondary d-flex justify-content-between py-10 px-20 align-items-center">
 									<a href="<?php echo e(route('user-dashboard')); ?>" class="d-flex align-items-center text-white">
-
 										<span><?php echo e(__('Dashboard')); ?></span>
 									</a>
+
 									<span class="slide-nav-close"><i class="flaticon-cancel flat-mini text-white"></i></span>
 								</div>
 
@@ -191,6 +252,7 @@
 										<i class="flaticon-user flat-small me-1"></i>
 										<span><?php echo e(__('Signup')); ?></span>
 									</a>
+
 									<span class="slide-nav-close"><i class="flaticon-cancel flat-mini text-white"></i></span>
 								</div>
 
@@ -226,6 +288,7 @@
 													<li class="nav-item">
 														<a class="nav-link" href="<?php echo e(route('front.blog')); ?>"><?php echo e(__('Blog')); ?></a>
 													</li>
+
 
 													<li class="nav-item">
 														<a class="nav-link" href="<?php echo e(route('front.faq')); ?>"><?php echo e(__('FAQ')); ?></a>
@@ -277,17 +340,38 @@
 							</div>
 						</nav>
 					</div>
-					<a class="navbar-brand" href="<?php echo e(route('front.index')); ?>"><img class="nav-logo lazy" data-src="<?php echo e(asset('assets/images/'.$gs->logo)); ?>" alt="Image not found !"></a>
+					<a class="navbar-brand" href="<?php echo e(route('front.index')); ?>">
+                        <?php if(file_exists(base_path('../assets/images/'.$gs->logo))): ?>
+                        <img src="<?php echo e(asset('assets/images/'.$gs->logo)); ?>" alt="<?php echo e($gs->title); ?>">
+                        <?php else: ?>
+                        <h2 class="text-primary font-weight-bold" style="letter-spacing: 1px; font-family: 'Jost', sans-serif;"><?php echo e($gs->title); ?></h2>
+                        <?php endif; ?>
+					</a>
 				</div>
 			</div>
 			<div class="col-xxl-3 col-xl-4 col-lg-3 col-6 order-lg-3">
 				<div class="d-flex align-items-center justify-content-end h-100 md-py-10">
 					<div class="sign-in position-relative font-general my-account-dropdown">
-						<a href="my-account.html" class="has-dropdown d-flex align-items-center text-dark text-decoration-none" title="My Account">
-							<?php if(Auth::check()): ?>
-							<img class="img-fluid user lazy" data-src="<?php echo e(Auth::user()->photo? asset('assets/images/users/'.Auth::user()->photo) : '<i class="flaticon-user-3 flat-mini mx-auto text-dark"></i>'); ?>" alt="">
+						<a href="my-account.html" class="has-dropdown d-flex align-items-center text-decoration-none" title="My Account">
+							<?php if(Auth::check() && !empty(trim(Auth::user()->photo))): ?>
+							<img class="img-fluid user lazy" data-src="<?php echo e(asset('assets/images/users/'.Auth::user()->photo)); ?>" alt="" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
+							<?php elseif(Auth::check()): ?>
+							<?php
+								$name = Auth::user()->name ?: 'User';
+								$nameParts = explode(' ', trim($name));
+								$initials = '';
+								if (count($nameParts) >= 2) {
+									$initials = strtoupper(substr($nameParts[0], 0, 1) . substr($nameParts[count($nameParts)-1], 0, 1));
+								} else {
+									$initials = strtoupper(substr($name, 0, 2));
+								}
+							?>
+							<div class="user-initials-badge" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--theme-dark-color); font-weight: 600; font-size: 13px; font-family: var(--theme-general-font);">
+								<?php echo e($initials); ?>
+
+							</div>
 							<?php else: ?>
-							<i class="flaticon-user-3 flat-mini mx-auto text-dark"></i>
+							<i class="fas fa-user-circle" style="font-size: 30px;"></i>
 							<?php endif; ?>
 						</a>
 						<ul class="my-account-popup">
@@ -310,17 +394,17 @@
 					<div class="wishlist-view header-cart-1 ms-2">
 						<?php if(Auth::check()): ?>
                             <a href="<?php echo e(route('user-wishlists')); ?>" class="cart " title="View Wishlist">
-                                <div class="cart-icon"><i class="flaticon-like flat-mini mx-auto text-dark"></i> <span class="header-cart-count " id="wishlist-count1"><?php echo e(Auth::user()->wishlistCount()); ?></span></div>
+                                <div class="cart-icon"><i class="flaticon-like flat-mini mx-auto"></i> <span class="header-cart-count " id="wishlist-count1"><?php echo e(Auth::user()->wishlistCount()); ?></span></div>
                             </a>
                             <?php else: ?>
                             <a href="<?php echo e(route('user.login')); ?>" class="cart " title="View Wishlist">
-                            <div class="cart-icon"><i class="flaticon-like flat-mini mx-auto text-dark"></i> <span class="header-cart-count" id="wishlist-count1"><?php echo e(0); ?></span></div>
+                            <div class="cart-icon"><i class="flaticon-like flat-mini mx-auto"></i> <span class="header-cart-count" id="wishlist-count1"><?php echo e(0); ?></span></div>
                             </a>
                         <?php endif; ?>
 					</div>
 					<div class="refresh-view header-cart-1 mx-2">
 						<a href="<?php echo e(route('product.compare')); ?>" class="cart " title="View Wishlist">
-							<div class="cart-icon"><i class="flaticon-shuffle flat-mini mx-auto text-dark"></i> <span class="header-cart-count " id="compare-count1"><?php echo e(Session::has('compare') ? count(Session::get('compare')->items) : '0'); ?></span></div>
+							<div class="cart-icon"><i class="flaticon-shuffle flat-mini mx-auto"></i> <span class="header-cart-count " id="compare-count1"><?php echo e(Session::has('compare') ? count(Session::get('compare')->items) : '0'); ?></span></div>
 						</a>
 					</div>
 					<div class="header-cart-1">

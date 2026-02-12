@@ -22,6 +22,16 @@ class DashboardController extends AdminBaseController
 
     public function index()
     {
+        // Redirect specialized roles
+        if(!Auth::guard('admin')->user()->IsSuper()) {
+            if(Auth::guard('admin')->user()->sectionCheck('print_production') && !Auth::guard('admin')->user()->sectionCheck('orders')) {
+                return redirect()->route('admin-printer-dashboard');
+            }
+            if(Auth::guard('admin')->user()->sectionCheck('manufacturing') && !Auth::guard('admin')->user()->sectionCheck('orders')) {
+                return redirect()->route('admin-manufacturing-dashboard');
+            }
+        }
+
         $data['pending'] = Order::where('status','=','pending')->get();
         $data['processing'] = Order::where('status','=','processing')->get();
         $data['completed'] = Order::where('status','=','completed')->get();
