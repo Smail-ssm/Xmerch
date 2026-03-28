@@ -66,7 +66,7 @@
                                     <td>{{ $job->id }}</td>
                                     <td>
                                         <a href="{{ route('admin-order-show', $job->order_id) }}" target="_blank">
-                                            #{{ $job->order->order_number ?? 'N/A' }}
+                                            #{{ optional($job->order)->order_number ?? 'N/A' }}
                                         </a>
                                     </td>
                                     <td>
@@ -75,11 +75,11 @@
                                             <img src="{{ asset('assets/images/products/' . $job->mockup_preview) }}" 
                                                  alt="" style="width: 40px; height: 40px; object-fit: cover; margin-right: 10px; border-radius: 4px;">
                                             @endif
-                                            <span>{{ Str::limit($job->product->name ?? 'N/A', 30) }}</span>
+                                            <span>{{ Str::limit(optional($job->product)->name ?? 'N/A', 30) }}</span>
                                         </div>
                                     </td>
                                     <td><span class="badge badge-danger">{{ $job->quantity }}</span></td>
-                                    <td>{{ $job->printer->name ?? __('Unassigned') }}</td>
+                                    <td>{{ optional($job->printer)->name ?? __('Unassigned') }}</td>
                                     <td>{{ $job->updated_at->format('M d, H:i') }}</td>
                                     <td>
                                         <span class="text-danger" title="{{ $job->notes }}">

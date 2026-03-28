@@ -1,512 +1,114 @@
 [
     {
-        "id": 4,
-        "name": "Electronic",
-        "slug": "electric",
+        "id": 1,
+        "name": "Apparel",
+        "slug": "apparel",
         "subs": [
             {
+                "id": 1,
+                "name": "T-Shirts",
+                "slug": "t-shirts",
+                "childs": []
+            },
+            {
                 "id": 2,
-                "name": "TELEVISION",
-                "slug": "television",
-                "childs": [
-                    {
-                        "id": 1,
-                        "name": "LCD TV"
-                    },
-                    {
-                        "id": 2,
-                        "name": "LED TV"
-                    },
-                    {
-                        "id": 3,
-                        "name": "Curved TV"
-                    },
-                    {
-                        "id": 4,
-                        "name": "Plasma TV"
-                    }
-                ]
+                "name": "Hoodies",
+                "slug": "hoodies",
+                "childs": []
             },
             {
                 "id": 3,
-                "name": "REFRIGERATOR",
-                "slug": "refrigerator",
-                "childs": [
-                    {
-                        "id": 5,
-                        "name": "Top Freezer"
-                    },
-                    {
-                        "id": 6,
-                        "name": "Side-by-Side"
-                    },
-                    {
-                        "id": 7,
-                        "name": "Counter-Depth"
-                    },
-                    {
-                        "id": 8,
-                        "name": "Mini Fridge"
-                    }
-                ]
+                "name": "Sweatshirts",
+                "slug": "sweatshirts",
+                "childs": []
             },
             {
                 "id": 4,
-                "name": "WASHING MACHINE",
-                "slug": "washing-machine",
-                "childs": [
-                    {
-                        "id": 9,
-                        "name": "Front Loading"
-                    },
-                    {
-                        "id": 10,
-                        "name": "Top Loading"
-                    },
-                    {
-                        "id": 11,
-                        "name": "Washer Dryer Combo"
-                    },
-                    {
-                        "id": 12,
-                        "name": "Laundry Center"
-                    }
-                ]
-            },
-            {
-                "id": 5,
-                "name": "AIR CONDITIONERS",
-                "slug": "air-conditioners",
-                "childs": [
-                    {
-                        "id": 13,
-                        "name": "Central Air"
-                    },
-                    {
-                        "id": 14,
-                        "name": "Window Air"
-                    },
-                    {
-                        "id": 15,
-                        "name": "Portable Air"
-                    },
-                    {
-                        "id": 16,
-                        "name": "Hybrid Air"
-                    }
-                ]
+                "name": "Tank Tops",
+                "slug": "tank-tops",
+                "childs": []
             }
         ]
     },
     {
-        "id": 5,
-        "name": "Fashion & Beauty",
-        "slug": "fashion-and-Beauty",
+        "id": 2,
+        "name": "Home & Living",
+        "slug": "home-living",
         "subs": [
             {
+                "id": 5,
+                "name": "Mugs",
+                "slug": "mugs",
+                "childs": []
+            },
+            {
                 "id": 6,
-                "name": "ACCESSORIES",
-                "slug": "accessories",
+                "name": "Pillows",
+                "slug": "pillows",
                 "childs": []
             },
             {
                 "id": 7,
-                "name": "BAGS",
-                "slug": "bags",
+                "name": "Canvas Prints",
+                "slug": "canvas-prints",
                 "childs": []
             },
             {
                 "id": 8,
-                "name": "CLOTHINGS",
-                "slug": "clothings",
+                "name": "Posters",
+                "slug": "posters",
                 "childs": []
-            },
+            }
+        ]
+    },
+    {
+        "id": 3,
+        "name": "Accessories",
+        "slug": "accessories",
+        "subs": [
             {
                 "id": 9,
-                "name": "SHOES",
-                "slug": "shoes",
-                "childs": []
-            }
-        ]
-    },
-    {
-        "id": 6,
-        "name": "Camera & Photo",
-        "slug": "camera-and-photo",
-        "subs": [
-            {
-                "id": 14,
-                "name": "DSLR",
-                "slug": "dslr",
+                "name": "Tote Bags",
+                "slug": "tote-bags",
                 "childs": []
             },
-            {
-                "id": 15,
-                "name": "Camera Phone",
-                "slug": "camera-phone",
-                "childs": []
-            },
-            {
-                "id": 16,
-                "name": "Action Camera",
-                "slug": "animation-camera",
-                "childs": []
-            },
-            {
-                "id": 17,
-                "name": "Digital Camera",
-                "slug": "digital-camera",
-                "childs": []
-            }
-        ]
-    },
-    {
-        "id": 7,
-        "name": "Smart Phone & Table",
-        "slug": "smart-phone-and-table",
-        "subs": [
             {
                 "id": 10,
-                "name": "APPLE",
-                "slug": "apple",
+                "name": "Phone Cases",
+                "slug": "phone-cases",
                 "childs": []
             },
             {
                 "id": 11,
-                "name": "SAMSUNG",
-                "slug": "samsung",
+                "name": "Stickers",
+                "slug": "stickers",
                 "childs": []
             },
             {
                 "id": 12,
-                "name": "LG",
-                "slug": "lg",
+                "name": "Notebooks",
+                "slug": "notebooks",
                 "childs": []
-            },
+            }
+        ]
+    },
+    {
+        "id": 4,
+        "name": "Tech Accessories",
+        "slug": "tech-accessories",
+        "subs": [
             {
                 "id": 13,
-                "name": "SONY",
-                "slug": "sony",
+                "name": "Laptop Sleeves",
+                "slug": "laptop-sleeves",
+                "childs": []
+            },
+            {
+                "id": 14,
+                "name": "Mouse Pads",
+                "slug": "mouse-pads",
                 "childs": []
             }
         ]
-    },
-    {
-        "id": 8,
-        "name": "Sport & Outdoor",
-        "slug": "sport-and-Outdoor",
-        "subs": []
-    },
-    {
-        "id": 9,
-        "name": "Jewelry & Watches",
-        "slug": "jewelry-and-watches",
-        "subs": []
-    },
-    {
-        "id": 10,
-        "name": "Health & Beauty",
-        "slug": "health-and-beauty",
-        "subs": []
-    },
-    {
-        "id": 11,
-        "name": "Books & Office",
-        "slug": "books-and-office",
-        "subs": []
-    },
-    {
-        "id": 12,
-        "name": "Toys & Hobbies",
-        "slug": "toys-and-hobbies",
-        "subs": []
-    },
-    {
-        "id": 15,
-        "name": "Automobiles",
-        "slug": "automobiles-and-motorcycles",
-        "subs": []
-    },
-    {
-        "id": 16,
-        "name": "Home decoration",
-        "slug": "Home-decoration-and-Appliance",
-        "subs": []
-    },
-    {
-        "id": 17,
-        "name": "Portable & Personal",
-        "slug": "portable-and-personal-electronics",
-        "subs": []
-    },
-    {
-        "id": 18,
-        "name": "Outdoor, Recreation",
-        "slug": "Outdoor-Recreation-and-Fitness",
-        "subs": []
-    },
-    {
-        "id": 19,
-        "name": "Surveillance Safety",
-        "slug": "Surveillance-Safety-and-Security",
-        "subs": []
-    },
-    {
-        "id": 20,
-        "name": "\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a",
-        "slug": "electric-arabic",
-        "subs": [
-            {
-                "id": 18,
-                "name": "\u0627\u0644\u062a\u0644\u0641\u0627\u0632",
-                "slug": "television-arabic",
-                "childs": [
-                    {
-                        "id": 17,
-                        "name": "\u062a\u0644\u0641\u0632\u064a\u0648\u0646 \u0627\u0644 \u0633\u064a \u062f\u064a"
-                    },
-                    {
-                        "id": 18,
-                        "name": "\u062a\u0644\u0641\u0632\u064a\u0648\u0646 LED\r\n"
-                    },
-                    {
-                        "id": 19,
-                        "name": "\u0627\u0644\u062a\u0644\u0641\u0632\u064a\u0648\u0646 \u0627\u0644\u0645\u0646\u062d\u0646\u064a\r\n"
-                    },
-                    {
-                        "id": 20,
-                        "name": "\u062a\u0644\u0641\u0632\u064a\u0648\u0646 \u0628\u0644\u0627\u0632\u0645\u0627\r\n"
-                    }
-                ]
-            },
-            {
-                "id": 19,
-                "name": "\u062b\u0644\u0627\u062c\u0629\r\n",
-                "slug": "refrigerator-arabic",
-                "childs": [
-                    {
-                        "id": 21,
-                        "name": "\u0627\u0644\u0641\u0631\u064a\u0632\u0631 \u0627\u0644\u0639\u0644\u0648\u064a\r\n"
-                    },
-                    {
-                        "id": 22,
-                        "name": "\u062c\u0646\u0628\u0627\u0623\u0644\u0649 \u062c\u0646\u0628\r\n"
-                    },
-                    {
-                        "id": 23,
-                        "name": "\u0645\u0643\u0627\u0641\u062d\u0629 \u0627\u0644\u0639\u0645\u0642\r\n"
-                    },
-                    {
-                        "id": 24,
-                        "name": "\u062b\u0644\u0627\u062c\u0629 \u0635\u063a\u064a\u0631\u0629\r\n"
-                    }
-                ]
-            },
-            {
-                "id": 20,
-                "name": "\u063a\u0633\u0627\u0644\u0629",
-                "slug": "washing-machine-arabic",
-                "childs": [
-                    {
-                        "id": 25,
-                        "name": "\u062a\u062d\u0645\u064a\u0644 \u0627\u0645\u0627\u0645\u064a\r\n"
-                    },
-                    {
-                        "id": 26,
-                        "name": "\u062a\u062d\u0645\u064a\u0644 \u0627\u0639\u0644\u0649\r\n"
-                    },
-                    {
-                        "id": 27,
-                        "name": "\u063a\u0633\u0627\u0644\u0629 \u0627\u0644\u0635\u062d\u0648\u0646 \u0643\u0648\u0645\u0628\u0648\r\n"
-                    },
-                    {
-                        "id": 28,
-                        "name": "\u0645\u0631\u0643\u0632 \u0627\u0644\u063a\u0633\u064a\u0644\r\n"
-                    }
-                ]
-            },
-            {
-                "id": 21,
-                "name": "\u0645\u0643\u064a\u0641\u0627\u062a \u0627\u0644\u0647\u0648\u0627\u0621\r\n",
-                "slug": "air-conditioners-arabic",
-                "childs": [
-                    {
-                        "id": 29,
-                        "name": "\u0633\u0646\u062a\u0631\u0627\u0644 \u0627\u064a\u0631\r\n"
-                    },
-                    {
-                        "id": 30,
-                        "name": "\u0646\u0627\u0641\u0630\u0629 \u0627\u0644\u0647\u0648\u0627\u0621\r\n"
-                    },
-                    {
-                        "id": 31,
-                        "name": "\u0627\u0644\u0647\u0648\u0627\u0621 \u0627\u0644\u0645\u062d\u0645\u0648\u0644\u0629\r\n"
-                    },
-                    {
-                        "id": 32,
-                        "name": "\u0627\u0644\u0647\u0648\u0627\u0621 \u0627\u0644\u0647\u062c\u064a\u0646\r\n"
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "id": 21,
-        "name": "\u0627\u0644\u062c\u0645\u0627\u0644 \u0627\u0644\u0623\u0632\u064a\u0627\u0621",
-        "slug": "fashion-and-Beauty-arabic",
-        "subs": [
-            {
-                "id": 22,
-                "name": "\u0645\u0633\u062a\u0644\u0632\u0645\u0627\u062a",
-                "slug": "accessories-arabic",
-                "childs": []
-            },
-            {
-                "id": 23,
-                "name": "\u0623\u0643\u064a\u0627\u0633",
-                "slug": "bags-arabic",
-                "childs": []
-            },
-            {
-                "id": 24,
-                "name": "\u0645\u0644\u0627\u0628\u0633\r\n",
-                "slug": "clothings-arabic",
-                "childs": []
-            },
-            {
-                "id": 25,
-                "name": "\u0623\u062d\u0630\u064a\u0629",
-                "slug": "shoes-arabic",
-                "childs": []
-            }
-        ]
-    },
-    {
-        "id": 22,
-        "name": "\u0627\u0644\u0643\u0627\u0645\u064a\u0631\u0627 \u0648\u0627\u0644\u0635\u0648\u0631",
-        "slug": "camera-and-photo-arabic",
-        "subs": [
-            {
-                "id": 30,
-                "name": "\u0627\u0644\u062f\u064a \u0627\u0633 \u0627\u0644\u0631",
-                "slug": "dslr-arabic",
-                "childs": []
-            },
-            {
-                "id": 31,
-                "name": "\u0647\u0627\u062a\u0641 \u0630\u0648 \u0643\u0627\u0645\u064a\u0631\u0627",
-                "slug": "camera-phone-arabic",
-                "childs": []
-            },
-            {
-                "id": 32,
-                "name": "\u0639\u0645\u0644 \u0627\u0644\u0643\u0627\u0645\u064a\u0631\u0627\r\n",
-                "slug": "animation-camera-arabic",
-                "childs": []
-            },
-            {
-                "id": 33,
-                "name": "\u0643\u0627\u0645\u064a\u0631\u0627 \u0631\u0642\u0645\u064a\u0629",
-                "slug": "digital-camera-arabic",
-                "childs": []
-            }
-        ]
-    },
-    {
-        "id": 23,
-        "name": "\u0627\u0644\u0647\u0627\u062a\u0641 \u0627\u0644\u0630\u0643\u064a \u0648\u0627\u0644\u062c\u062f\u0648\u0644",
-        "slug": "smart-phone-and-table-arabic",
-        "subs": [
-            {
-                "id": 26,
-                "name": "\u062a\u0641\u0627\u062d\u0629",
-                "slug": "apple-arabic",
-                "childs": []
-            },
-            {
-                "id": 27,
-                "name": "\u0633\u0627\u0645\u0633\u0648\u0646\u062c",
-                "slug": "samsung-arabic",
-                "childs": []
-            },
-            {
-                "id": 28,
-                "name": "\u0625\u0644 \u062c\u064a\r\n",
-                "slug": "lg-arabic",
-                "childs": []
-            },
-            {
-                "id": 29,
-                "name": "\u0633\u0648\u0646\u064a",
-                "slug": "sony-arabic",
-                "childs": []
-            }
-        ]
-    },
-    {
-        "id": 24,
-        "name": "\u0631\u064a\u0627\u0636\u0629 \u0648\u062e\u0627\u0631\u062c\u064a\u0629",
-        "slug": "sport-and-Outdoor-arabic",
-        "subs": []
-    },
-    {
-        "id": 25,
-        "name": "\u0627\u0644\u0645\u062c\u0648\u0647\u0631\u0627\u062a \u0648\u0627\u0644\u0633\u0627\u0639\u0627\u062a",
-        "slug": "jewelry-and-watches-arabic",
-        "subs": []
-    },
-    {
-        "id": 26,
-        "name": "\u0627\u0644\u0635\u062d\u0629 \u0648\u0627\u0644\u062c\u0645\u0627\u0644",
-        "slug": "health-and-beauty-arabic",
-        "subs": []
-    },
-    {
-        "id": 27,
-        "name": "\u0627\u0644\u0643\u062a\u0628 \u0648\u0627\u0644\u0645\u0643\u0627\u062a\u0628",
-        "slug": "books-and-office-arabic",
-        "subs": []
-    },
-    {
-        "id": 28,
-        "name": "\u0623\u0644\u0639\u0627\u0628 \u0648\u0647\u0648\u0627\u064a\u0627\u062a",
-        "slug": "toys-and-hobbies-arabic",
-        "subs": []
-    },
-    {
-        "id": 29,
-        "name": "\u0643\u062a\u0628",
-        "slug": "books-arabic",
-        "subs": []
-    },
-    {
-        "id": 30,
-        "name": "\u0633\u064a\u0627\u0631\u0627\u062a",
-        "slug": "automobiles-and-motorcycles-arabic",
-        "subs": []
-    },
-    {
-        "id": 31,
-        "name": "\u062f\u064a\u0643\u0648\u0631 \u0627\u0644\u0645\u0646\u0632\u0644",
-        "slug": "Home-decoration-and-Appliance-arabic",
-        "subs": []
-    },
-    {
-        "id": 32,
-        "name": "\u0627\u0644\u0645\u062d\u0645\u0648\u0644\u0629 \u0648\u0627\u0644\u0634\u062e\u0635\u064a\u0629",
-        "slug": "portable-and-personal-electronics-arabic",
-        "subs": []
-    },
-    {
-        "id": 33,
-        "name": "\u0627\u0644\u0627\u0633\u062a\u062c\u0645\u0627\u0645 \u0641\u064a \u0627\u0644\u0647\u0648\u0627\u0621 \u0627\u0644\u0637\u0644\u0642",
-        "slug": "Outdoor-Recreation-and-Fitness-arabic",
-        "subs": []
-    },
-    {
-        "id": 34,
-        "name": "\u0633\u0644\u0627\u0645\u0629 \u0627\u0644\u0645\u0631\u0627\u0642\u0628\u0629",
-        "slug": "Surveillance-Safety-and-Security-arabic",
-        "subs": []
     }
 ]

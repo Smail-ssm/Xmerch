@@ -67,6 +67,9 @@
     font-weight: 600;
 }
 .status-badge.pending { background: #fff3cd; color: #856404; }
+.status-badge.manufacturing { background: #fff3cd; color: #856404; }
+.status-badge.pending-print { background: #e2e3e5; color: #383d41; }
+.status-badge.print-ready { background: #d1ecf1; color: #0c5460; }
 .status-badge.printing { background: #cce5ff; color: #004085; }
 .status-badge.printed { background: #d4edda; color: #155724; }
 .status-badge.shipped { background: #d1ecf1; color: #0c5460; }
@@ -107,7 +110,7 @@
                 <i class="fas fa-clock stat-icon"></i>
                 <div class="stat-number">{{ $stats['pending'] }}</div>
                 <div class="stat-label">{{ __('Total Pending') }}</div>
-                <a href="{{ route('admin-printer-queue') }}">View All →</a>
+                <a href="{{ route('admin-printer-queue') }}">{{ __('View All') }} &rarr;</a>
             </div>
         </div>
         <div class="col-lg-3 col-md-6">
@@ -123,7 +126,7 @@
                 <i class="fas fa-print stat-icon"></i>
                 <div class="stat-number">{{ $stats['printing'] }}</div>
                 <div class="stat-label">{{ __('Currently Printing') }}</div>
-                <a href="{{ route('admin-printer-printing') }}">View →</a>
+                <a href="{{ route('admin-printer-printing') }}">{{ __('View') }} &rarr;</a>
             </div>
         </div>
         <div class="col-lg-3 col-md-6">
@@ -131,7 +134,7 @@
                 <i class="fas fa-check-circle stat-icon"></i>
                 <div class="stat-number">{{ $stats['printed'] }}</div>
                 <div class="stat-label">{{ __('Ready to Ship') }}</div>
-                <a href="{{ route('admin-printer-ready') }}">View →</a>
+                <a href="{{ route('admin-printer-ready') }}">{{ __('View') }} &rarr;</a>
             </div>
         </div>
         <div class="col-lg-3 col-md-6">
@@ -139,7 +142,7 @@
                 <i class="fas fa-shipping-fast stat-icon"></i>
                 <div class="stat-number">{{ $stats['shipped_today'] }}</div>
                 <div class="stat-label">{{ __('Shipped Today') }}</div>
-                <a href="{{ route('admin-printer-shipped') }}">View All →</a>
+                <a href="{{ route('admin-printer-shipped') }}">{{ __('View All') }} &rarr;</a>
             </div>
         </div>
     </div>
@@ -217,13 +220,19 @@
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         @if(in_array($order->print_status, ['print_ready', 'pending_print']))
-                                        <a href="{{ route('admin-printer-start', $order->id) }}" class="action-btn start">
-                                            <i class="fas fa-play"></i> Start
-                                        </a>
+                                        <form action="{{ route('admin-printer-start', $order->id) }}" method="POST" style="display:inline;">
+                                            @csrf
+                                            <button type="submit" class="action-btn start">
+                                                <i class="fas fa-play"></i> Start
+                                            </button>
+                                        </form>
                                         @elseif($order->print_status == 'printing')
-                                        <a href="{{ route('admin-printer-printed', $order->id) }}" class="action-btn finish">
-                                            <i class="fas fa-check"></i> Done
-                                        </a>
+                                        <form action="{{ route('admin-printer-printed', $order->id) }}" method="POST" style="display:inline;">
+                                            @csrf
+                                            <button type="submit" class="action-btn finish">
+                                                <i class="fas fa-check"></i> Done
+                                            </button>
+                                        </form>
                                         @endif
                                     </td>
                                 </tr>

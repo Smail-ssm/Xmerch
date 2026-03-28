@@ -2,14 +2,19 @@
 
 namespace App\Models;
 use DB;
+use App\Models\Product;
 
 use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
     /**
+     * Per-request cache for pending POD quantities keyed by product id.
+     */
+    protected static $pendingPodQtyCache = null;
+    /**
      * Print status constants for POD
-     * Flow: manufacturing → print_ready → printing → printed → shipped
+     * Flow: manufacturing -> print_ready -> printing -> printed -> shipped
      */
     const PRINT_STATUS_MANUFACTURING = 'manufacturing';
     const PRINT_STATUS_PRINT_READY = 'print_ready';
@@ -121,35 +126,71 @@ class Order extends Model
     public function isEligibleForProduction()
     {
         $productIds = $this->getProductIds();
-        
-        foreach ($productIds as $pid) {
-            $product = \App\Models\Product::find($pid);
-            if (!$product || !$product->is_pod) continue;
 
-            // Count total items of this product in all pending orders
-            $totalPending = 0;
-            $pendingOrders = Order::where('status', 'processing')
-                ->whereIn('print_status', [Order::PRINT_STATUS_MANUFACTURING, Order::PRINT_STATUS_PENDING])
-                ->get();
+        if (empty($productIds)) {
+            return false;
+        }
 
-            foreach ($pendingOrders as $pOrder) {
-                $pCart = json_decode($pOrder->cart, true);
-                if (isset($pCart['items'])) {
-                    foreach ($pCart['items'] as $item) {
-                        if (isset($item['item']['id']) && $item['item']['id'] == $pid) {
-                            $totalPending += $item['qty'];
-                        }
-                    }
-                }
-            }
+        if (!Product::hasIsPodColumn() || !Product::hasProductionCapColumn()) {
+            return false;
+        }
 
-            // If any product in the order has reached its cap, we can consider the order "eligible" or at least highlight it
-            if ($totalPending >= $product->production_cap) {
+        $podProducts = Product::whereIn('id', $productIds)
+            ->pod()
+            ->withPositiveProductionCap()
+            ->get(['id', 'production_cap']);
+
+        if ($podProducts->isEmpty()) {
+            return false;
+        }
+
+        $pendingQuantities = $this->getPendingPodQuantities();
+
+        foreach ($podProducts as $product) {
+            $totalPending = (int) ($pendingQuantities[$product->id] ?? 0);
+
+            // Keep legacy semantics used by current UI: highlight when capacity is reached.
+            if ($totalPending >= (int) $product->production_cap) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Build and cache pending POD quantities once per request.
+     */
+    protected function getPendingPodQuantities()
+    {
+        if (is_array(self::$pendingPodQtyCache)) {
+            return self::$pendingPodQtyCache;
+        }
+
+        $quantities = [];
+        $pendingOrders = self::where('status', 'processing')
+            ->whereIn('print_status', [self::PRINT_STATUS_MANUFACTURING, self::PRINT_STATUS_PENDING])
+            ->get(['cart']);
+
+        foreach ($pendingOrders as $pendingOrder) {
+            $pCart = json_decode($pendingOrder->cart, true);
+            if (!isset($pCart['items']) || !is_array($pCart['items'])) {
+                continue;
+            }
+
+            foreach ($pCart['items'] as $item) {
+                $pid = $item['item']['id'] ?? null;
+                if (!$pid) {
+                    continue;
+                }
+
+                $quantities[$pid] = ($quantities[$pid] ?? 0) + (int) ($item['qty'] ?? 1);
+            }
+        }
+
+        self::$pendingPodQtyCache = $quantities;
+
+        return self::$pendingPodQtyCache;
     }
 
     /**
@@ -169,7 +210,16 @@ class Order extends Model
                 if (isset($item['item']['id'])) {
                     $product = \App\Models\Product::find($item['item']['id']);
                     if ($product && $product->is_pod && $product->print_file) {
-                        return asset('assets/files/designs/' . $product->print_file);
+                        $newPath = public_path('assets/files/designs/' . $product->print_file);
+                        if (file_exists($newPath)) {
+                            return asset('assets/files/designs/' . $product->print_file);
+                        }
+
+                        // Backward compatibility for legacy vendor exports.
+                        $legacyPath = public_path('assets/images/products/' . $product->print_file);
+                        if (file_exists($legacyPath)) {
+                            return asset('assets/images/products/' . $product->print_file);
+                        }
                     }
                 }
             }
@@ -193,7 +243,16 @@ class Order extends Model
                 if (isset($item['item']['id'])) {
                     $product = \App\Models\Product::find($item['item']['id']);
                     if ($product && $product->is_pod && $product->print_file) {
-                        return public_path('assets/files/designs/' . $product->print_file);
+                        $newPath = public_path('assets/files/designs/' . $product->print_file);
+                        if (file_exists($newPath)) {
+                            return $newPath;
+                        }
+
+                        // Backward compatibility for legacy vendor exports.
+                        $legacyPath = public_path('assets/images/products/' . $product->print_file);
+                        if (file_exists($legacyPath)) {
+                            return $legacyPath;
+                        }
                     }
                 }
             }
@@ -270,3 +329,4 @@ class Order extends Model
         return $data; 
     }
 }
+

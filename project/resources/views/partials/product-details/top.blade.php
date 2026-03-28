@@ -59,7 +59,7 @@
                          <div class="pro-info">
                               <div class="woocommerce-product-rating">
                                   <div class="fancy-star-rating">
-                                      <div class="rating-wrap"> <span class="fancy-rating good">{{ App\Models\Rating::ratings($productt->id) }} ★</span>
+                                      <div class="rating-wrap"> <span class="fancy-rating good">{{ App\Models\Rating::ratings($productt->id) }} &#9733;</span>
                                       </div>
                                       <div class="rating-counts-wrap">
                                           <a href="#reviews" class="bigbazar-rating-review-link" rel="nofollow"> <span class="rating-counts"> ({{ App\Models\Rating::ratingCount($productt->id) }}) </span> </a>
@@ -69,7 +69,7 @@
 
                               <p class="price">
                                   <span class="woocommerce-Price-amount amount mr-4">
-                                      <bdi><span class="woocommerce-Price-currencySymbol" id="sizeprice">{{ $productt->showPrice() }}</bdi>
+                                      <bdi><span class="woocommerce-Price-currencySymbol" id="sizeprice">{{ $productt->showPrice() }}</span></bdi>
                                   </span>
                                   <del class="ml-3"><small>{{ $productt->showPreviousPrice() }}</small></del>
                                  <span class="on-sale"><span>{{ round((double)$productt->offPercentage() )}}</span>% Off</span>
@@ -280,7 +280,7 @@
                           </div>
                           @endif
                           <div class="compare-button">
-                              <a class="compare button" data-href="{{ route('product.compare.add',$productt->id) }}" href="javascrit:;" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Compare" aria-label="Compare">{{ __('Compare') }}</a>
+                              <a class="compare button" data-href="{{ route('product.compare.add',$productt->id) }}" href="javascript:;" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Compare" aria-label="Compare">{{ __('Compare') }}</a>
                           </div>
 
                       </div>
@@ -398,9 +398,9 @@
                 {{ App\Models\Admin::find(1)->shop_name }}
                 @endif</h5>
                 @if( $productt->user_id  != 0)
-                <h3>{{ App\Models\Product::where('user_id','=',$productt->user_id)->get()->count() }}</h3>
+                <h3>{{ App\Models\Product::where('user_id','=',$productt->user_id)->count() }}</h3>
                 @else
-                <h3>{{ App\Models\Product::where('user_id','=',0)->get()->count() }}</h3>
+                <h3>{{ App\Models\Product::where('user_id','=',0)->count() }}</h3>
                 @endif
                 <h6>{{ __('Total Items') }}</h6>
 
@@ -459,7 +459,7 @@
 <br>
             @if($productt->user_id != 0)
               @if(Auth::check())
-                  @if(Auth::user()->favorites()->where('vendor_id','=',$productt->user_id)->get()->count() > 0)
+                  @if(Auth::user()->favorites()->where('vendor_id','=',$productt->user_id)->exists())
 
                   <a class="fvrt btn--base" href="javascript:;">
                       <i class="icofont-check"></i>
@@ -607,3 +607,4 @@
     </div>
   </div>
 </div>
+

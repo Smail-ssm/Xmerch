@@ -73,7 +73,7 @@
          </div>
          </div>
 
-         @if($productt->user_id != 0 && $productt->user->products->count() > 0)
+         @if($productt->user_id != 0 && $vendors->count() > 0)
          <div class="col-lg-3">
 
                     <div class="section-head border-bottom d-flex justify-content-between align-items-center">
@@ -84,7 +84,7 @@
 
                     <div class="product-style-2 owl-carousel owl-nav-hover-primary nav-top-right single-carousel dot-disable product-list e-bg-white">
 
-                        @foreach($productt->user->products->take(9)->chunk(3) as $chunk)
+                        @foreach($vendors->take(9)->chunk(3) as $chunk)
 
                         <div class="item">
                             <div class="row row-cols-1">
@@ -94,10 +94,10 @@
                                     <div class="product type-product">
                                         <div class="product-wrapper">
                                             <div class="product-image">
-                                                <a href="{{ route('front.product', $prod['slug']) }}" class="woocommerce-LoopProduct-link"><img class="lazy" data-src="{{ $prod['photo'] ? asset('assets/images/products/'.$prod['photo'] ):asset('assets/images/noimage.png') }}" alt="Product Image"></a>
+                                                <a href="{{ route('front.product', $prod->slug) }}" class="woocommerce-LoopProduct-link"><img class="lazy" data-src="{{ $prod->photo ? asset('assets/images/products/'.$prod->photo ):asset('assets/images/noimage.png') }}" alt="Product Image"></a>
                                                 <div class="wishlist-view">
                                                     <div class="quickview-button">
-                                                        <a class="quickview-btn" href="{{ route('front.product', $prod['slug']) }}" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Quick View" aria-label="Quick View">{{ __('Quick View') }}</a>
+                                                        <a class="quickview-btn" href="{{ route('front.product', $prod->slug) }}" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Quick View" aria-label="Quick View">{{ __('Quick View') }}</a>
                                                     </div>
                                                     <div class="whishlist-button">
                                                         <a class="add_to_wishlist" href="#" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Add to Wishlist" aria-label="Add to Wishlist">{{ __('Wishlist') }}</a>
@@ -105,21 +105,21 @@
                                             </div>
                                             </div>
                                             <div class="product-info">
-                                                <h3 class="product-title"><a href="{{ route('front.product', $prod['slug']) }}">{{ App\Models\Product::whereId($prod['id'])->first()->showName() }}</a></h3>
+                                                <h3 class="product-title"><a href="{{ route('front.product', $prod->slug) }}">{{ $prod->showName() }}</a></h3>
                                                 <div class="product-price">
                                                     <div class="price">
-                                                        <ins>{{ App\Models\Product::whereId($prod['id'])->first()->showPrice() }}</ins>
-                                                        <del>{{ App\Models\Product::whereId($prod['id'])->first()->showPreviousPrice() }}</del>
+                                                        <ins>{{ $prod->showPrice() }}</ins>
+                                                        <del>{{ $prod->showPreviousPrice() }}</del>
                                                     </div>
-                                                    <div class="on-sale"><span>{{ round((double)App\Models\Product::whereId($prod['id'])->first()->offPercentage())}}</span><span>% off</span></div>
+                                                    <div class="on-sale"><span>{{ round((double)$prod->offPercentage())}}</span><span>% off</span></div>
                                                 </div>
                                                 <div class="shipping-feed-back">
                                                     <div class="star-rating">
                                                         <div class="rating-wrap">
-                                                            <p><i class="fas fa-star"></i><span> {{ App\Models\Rating::ratings($prod['id']) }}</span></p>
+                                                            <p><i class="fas fa-star"></i><span> {{ App\Models\Rating::ratings($prod->id) }}</span></p>
                                                         </div>
                                                         <div class="rating-counts-wrap">
-                                                            <p>({{ App\Models\Rating::ratingCount($prod['id']) }})</p>
+                                                            <p>({{ App\Models\Rating::ratingCount($prod->id) }})</p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -152,20 +152,20 @@
          <div class="col-12">
             <div class="products product-style-1 owl-mx-5">
                <div class="five-carousel owl-carousel nav-top-right e-title-hover-primary e-image-bg-light e-hover-image-zoom e-info-center">
-                  @foreach (DB::table('products')->where('type',$productt->type)->where('product_type',$productt->product_type)->where('language_id',Session::has('language') ? Session::get('language') : 1)->take(12)->get() as $item)
+                  @foreach ($relatedProducts as $item)
                   <div class="item">
                      <div class="product type-product">
                         <div class="product-wrapper">
                            <div class="product-image">
                               <a href="{{ route('front.product', $item->slug) }}" class="woocommerce-LoopProduct-link"><img class="lazy" data-src="{{ $item->photo ? asset('assets/images/products/'.$item->photo):asset('assets/images/noimage.png')}}" alt="Product Image"></a>
-                              <div class="on-sale">-{{ round((double)App\Models\Product::find($item->id)->offPercentage())}}%</div>
+                              <div class="on-sale">-{{ round((double)$item->offPercentage())}}%</div>
                               <div class="hover-area">
                                  @if($item->product_type == "affiliate")
                                  <div class="cart-button">
                                     <a href="javascript:;" data-href="{{ $item->affiliate_link }}" class="button add_to_cart_button affilate-btn" data-bs-toggle="tooltip" data-bs-placement="right" title="" data-bs-original-title="{{ __('Add To Cart') }}" aria-label="{{ __('Add To Cart') }}"></a>
                                  </div>
                                  @else
-                                 @if(App\Models\Product::where('id',$item->id)->first()->emptyStock())
+                                 @if($item->emptyStock())
                                  <div class="closed">
                                     <a class="cart-out-of-stock button add_to_cart_button" href="#" title="{{ __('Out Of Stock') }}" ><i class="flaticon-cancel flat-mini mx-auto"></i></a>
                                  </div>
@@ -188,16 +188,16 @@
                                  </div>
                                  @endif
                                  <div class="compare-button">
-                                    <a class="compare button add_to_cart_button" data-href="{{ route('product.compare.add',$item->id) }}" href="javascrit:;" data-bs-toggle="tooltip" data-bs-placement="right" title="" data-bs-original-title="Compare" aria-label="Compare">{{ __('Compare') }}</a>
+                                    <a class="compare button add_to_cart_button" data-href="{{ route('product.compare.add',$item->id) }}" href="javascript:;" data-bs-toggle="tooltip" data-bs-placement="right" title="" data-bs-original-title="Compare" aria-label="Compare">{{ __('Compare') }}</a>
                                  </div>
                               </div>
                            </div>
                            <div class="product-info">
-                              <h3 class="product-title"><a href="{{ route('front.product', $item->slug) }}">{{ App\Models\Product::find($item->id)->showName()}}</a></h3>
+                              <h3 class="product-title"><a href="{{ route('front.product', $item->slug) }}">{{ $item->showName()}}</a></h3>
                               <div class="product-price">
                                  <div class="price">
-                                    <ins>{{ App\Models\Product::find($item->id)->showPrice()}}</ins>
-                                    <del>{{ App\Models\Product::find($item->id)->showPreviousPrice() }}</del>
+                                    <ins>{{ $item->showPrice()}}</ins>
+                                    <del>{{ $item->showPreviousPrice() }}</del>
                                  </div>
                               </div>
                               <div class="shipping-feed-back">
@@ -354,3 +354,4 @@ lazy();
 
 </script>
 @endsection
+

@@ -155,23 +155,42 @@ class User extends Authenticatable
 
     public function checkVerification()
     {
-        return count($this->verifies) > 0 ? 
-        (empty($this->verifies()->where('admin_warning','=','0')->latest('id')->first()->status) ? false : ($this->verifies()->latest('id')->first()->status == 'Pending' ? true : false)) : false;
+        $latestSubmission = $this->verifies()
+            ->where('admin_warning', 0)
+            ->latest('id')
+            ->first();
+
+        return !empty($latestSubmission) && $latestSubmission->status === 'Pending';
     }
 
     public function checkStatus()
     {
-        return count($this->verifies) > 0 ? ($this->verifies()->latest('id')->first()->status == 'Verified' ? true : false) :false;
+        $latestSubmission = $this->verifies()
+            ->where('admin_warning', 0)
+            ->latest('id')
+            ->first();
+
+        return !empty($latestSubmission) && $latestSubmission->status === 'Verified';
     }
 
     public function checkWarning()
     {
-        return count($this->verifies) > 0 ? ( empty( $this->verifies()->where('admin_warning','=','1')->latest('id')->first() ) ? false : (empty($this->verifies()->where('admin_warning','=','1')->latest('id')->first()->status) ? true : false) ) : false;
+        $latestWarning = $this->verifies()
+            ->where('admin_warning', 1)
+            ->latest('id')
+            ->first();
+
+        return !empty($latestWarning) && empty($latestWarning->status);
     }
 
     public function displayWarning()
     {
-        return $this->verifies()->where('admin_warning','=','1')->latest('id')->first()->warning_reason;
+        $latestWarning = $this->verifies()
+            ->where('admin_warning', 1)
+            ->latest('id')
+            ->first();
+
+        return $latestWarning ? (string) $latestWarning->warning_reason : '';
     }
 
 }

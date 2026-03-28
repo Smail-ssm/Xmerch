@@ -119,9 +119,12 @@
                                     <a href="{{ route('admin-manufacturing-show', $order->id) }}" class="btn btn-sm btn-info" title="{{ __('View Details') }}">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ route('admin-manufacturing-mark-ready', $order->id) }}" class="btn btn-sm btn-success" title="{{ __('Mark Print Ready') }}" onclick="return confirm('{{ __('Mark this order as Print Ready?') }}')">
-                                        <i class="fas fa-check"></i> {{ __('Ready') }}
-                                    </a>
+                                    <form action="{{ route('admin-manufacturing-mark-ready', $order->id) }}" method="POST" style="display:inline;">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-success" title="{{ __('Mark Print Ready') }}" onclick="return confirm('{{ __('Mark this order as Print Ready?') }}')">
+                                            <i class="fas fa-check"></i> {{ __('Ready') }}
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>

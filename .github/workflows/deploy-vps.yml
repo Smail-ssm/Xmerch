@@ -71,7 +71,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT != '' && secrets.VPS_PORT || '22' }}
-          source: "deploy/production"
+          source: "deploy/production,deploy/scripts"
           target: ${{ secrets.VPS_DEPLOY_PATH }}
           strip_components: 1
 
@@ -106,6 +106,7 @@ jobs:
             STACK_DIR="${DEPLOY_PATH}/production"
             mkdir -p "${STACK_DIR}"
             cd "${STACK_DIR}"
+            chmod +x "${DEPLOY_PATH}/scripts/"*.sh || true
 
             cat > .env.production <<'EOF'
             ${{ secrets.XMERCH_ENV_PRODUCTION }}

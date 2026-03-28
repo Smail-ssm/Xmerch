@@ -73,9 +73,9 @@
                                 </div>
 
                                 {{-- Print File Download --}}
-                                @if($item['product']->print_file)
+                                @if(!empty($item['print_file_url']))
                                 <div class="mt-3">
-                                    <a href="{{ asset('assets/files/designs/' . $item['product']->print_file) }}" 
+                                    <a href="{{ $item['print_file_url'] }}" 
                                        class="btn btn-primary" download>
                                         <i class="fas fa-download"></i> {{ __('Download Print File') }}
                                     </a>
@@ -165,11 +165,14 @@
             {{-- Action --}}
             <div class="card">
                 <div class="card-body">
-                    <a href="{{ route('admin-manufacturing-mark-ready', $order->id) }}" 
-                       class="btn btn-success btn-block btn-lg" 
-                       onclick="return confirm('{{ __('Mark this order as Print Ready and send to printer queue?') }}')">
-                        <i class="fas fa-check-circle"></i> {{ __('Mark as Print Ready') }}
-                    </a>
+                    <form action="{{ route('admin-manufacturing-mark-ready', $order->id) }}" method="POST">
+                        @csrf
+                        <button type="submit"
+                            class="btn btn-success btn-block btn-lg" 
+                            onclick="return confirm('{{ __('Mark this order as Print Ready and send to printer queue?') }}')">
+                            <i class="fas fa-check-circle"></i> {{ __('Mark as Print Ready') }}
+                        </button>
+                    </form>
                     <small class="text-muted d-block text-center mt-2">
                         {{ __('This will send the order to the Printer Queue') }}
                     </small>

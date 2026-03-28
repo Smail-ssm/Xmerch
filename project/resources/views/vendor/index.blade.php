@@ -25,7 +25,7 @@
 
                         <div class="row mb-4">
                             <div class="col-12 text-right">
-                                @if($gs->pod_designer_mode == 1)
+                                @if(($gs->pod_designer_mode ?? 0) == 1)
                                 <a href="{{ route('vendor-prod-create', ['slug' => 'physical', 'mode' => 'pod']) }}" class="btn btn-primary btn-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border:none; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
                                     <i class="fas fa-plus"></i> {{ __('Create New Design') }}
                                 </a>

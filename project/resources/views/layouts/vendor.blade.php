@@ -174,7 +174,7 @@
 								</a>
 								<ul class="collapse list-unstyled" id="menu2" data-parent="#accordion">
 									<li>
-										@if($gs->pod_designer_mode == 1)
+										@if(($gs->pod_designer_mode ?? 0) == 1)
 										<a href="{{ route('vendor-prod-create', ['slug' => 'physical', 'mode' => 'pod']) }}"><span>{{ __('Upload New Design') }}</span></a>
 										@else
 										<a href="{{ route('vendor-prod-create', ['slug' => 'physical']) }}"><span>{{ __('Upload New Design') }}</span></a>

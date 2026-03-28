@@ -16,6 +16,7 @@ use App\{
 use Auth;
 use Session;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Schema;
 
 class OrderHelper
 {
@@ -215,6 +216,11 @@ class OrderHelper
 
     public static function vendor_order_check($cart,$order){
         try{
+            // Enforce POD print-job creation for every successful checkout path.
+            // Some gateways call create_print_jobs() explicitly and some do not,
+            // so create_print_jobs() is idempotent to keep this safe.
+            self::create_print_jobs($cart, $order);
+
             $notf = array();
 
             foreach($cart->items as $prod)
@@ -358,17 +364,34 @@ class OrderHelper
             }
 
             $printJobsCreated = 0;
-            
+            $hasPodProducts = false;
+            $printJobModel = '\App\Models\PrintJob';
+             
             foreach($cart->items as $prod)
             {
                 // Check if this is a POD product
                 $product = Product::find($prod['item']['id']);
-                
+                 
                 if($product && isset($product->is_pod) && $product->is_pod == 1)
                 {
+                    $hasPodProducts = true;
+
                     // Get quality tier from cart item or use product default
                     $qualityTier = $prod['quality_tier'] ?? $product->quality_tier ?? 'standard';
-                    
+                    $designFile = $product->print_file ?? $product->photo;
+
+                    // Idempotency guard: avoid duplicate jobs when multiple gateway
+                    // code paths call this helper for the same order.
+                    $alreadyExists = $printJobModel::where('order_id', $order->id)
+                        ->where('product_id', $product->id)
+                        ->where('quantity', $prod['qty'])
+                        ->where('quality_tier', $qualityTier)
+                        ->where('design_file', $designFile)
+                        ->exists();
+                    if ($alreadyExists) {
+                        continue;
+                    }
+                     
                     // Determine priority based on quality tier
                     $priority = match($qualityTier) {
                         'deluxe' => 1,
@@ -380,7 +403,7 @@ class OrderHelper
                     $printJob = new \App\Models\PrintJob();
                     $printJob->order_id = $order->id;
                     $printJob->product_id = $product->id;
-                    $printJob->design_file = $product->print_file ?? $product->photo;
+                    $printJob->design_file = $designFile;
                     $printJob->mockup_preview = $product->photo;
                     $printJob->quantity = $prod['qty'];
                     $printJob->quality_tier = $qualityTier;
@@ -396,6 +419,14 @@ class OrderHelper
             // Log print jobs created (optional)
             if ($printJobsCreated > 0) {
                 \Log::info("Created {$printJobsCreated} print jobs for order #{$order->order_number}");
+            }
+
+            // POD orders should be routed to manufacturing first.
+            if ($hasPodProducts && Schema::hasColumn('orders', 'print_status')) {
+                if (empty($order->print_status) || $order->print_status === 'pending_print') {
+                    $order->print_status = 'manufacturing';
+                    $order->save();
+                }
             }
 
             return $printJobsCreated;

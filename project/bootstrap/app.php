@@ -35,6 +35,10 @@ $app->singleton(
     App\Exceptions\Handler::class
 );
 
-$app->useEnvironmentPath(realpath(__DIR__.'/../vendor/markury/src/'));
+$legacyEnvPath = realpath(__DIR__.'/../vendor/markury/src/');
+
+if ($legacyEnvPath && is_dir($legacyEnvPath)) {
+    $app->useEnvironmentPath($legacyEnvPath);
+}
 
 return $app;

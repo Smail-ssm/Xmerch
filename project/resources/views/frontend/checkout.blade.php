@@ -1,6 +1,9 @@
 @extends('layouts.front')
 @section('content')
 @include('partials.global.common-header')
+@php
+   $tnOnlyMode = filter_var(env('TN_ONLY_MODE', false), FILTER_VALIDATE_BOOLEAN);
+@endphp
 <!-- breadcrumb -->
 <div class="full-row bg-light overlay-dark py-5" style="background-image: url({{ $gs->breadcrumb_banner ? asset('assets/images/'.$gs->breadcrumb_banner):asset('assets/images/noimage.png') }}); background-position: center center; background-size: cover;">
    <div class="container">
@@ -23,6 +26,11 @@
 <!-- Check Out Area Start -->
 <section class="checkout">
    <div class="container">
+      @if($tnOnlyMode)
+      <div class="alert alert-info mb-3">
+         {{ __('Tunisia checkout mode is active. Please use a Tunisian phone number and postal code.') }}
+      </div>
+      @endif
       <div class="row">
          <div class="col-lg-12">
             <div class="checkout-area mb-0 pb-0">
@@ -62,7 +70,7 @@
                         <div class="content-box">
                            <div class="content">
                               <div class="submit-loader" style="display: none;">
-                                 <img src="//localhost/demo/geniuscart/default/assets/images/loading_large.gif" alt="">
+                                 <img src="{{ asset('assets/images/'.$gs->loader) }}" alt="{{ __('Loading') }}">
                               </div>
                               <div class="personal-info">
                                  <h5 class="title">
@@ -135,6 +143,7 @@
                                     <div class="col-lg-6">
                                        <input class="form-control" type="text" name="customer_phone"
                                           placeholder="{{ __('Phone Number') }}" required=""
+                                          inputmode="numeric" pattern="^(\\+216|216)?[0-9]{8}$" maxlength="12"
                                           value="{{ Auth::check() ? Auth::user()->phone : '' }}">
                                     </div>
                                     <div class="col-lg-6">
@@ -151,6 +160,7 @@
                                     <div class="col-lg-6">
                                        <input class="form-control" type="text" name="customer_zip"
                                           placeholder="{{ __('Postal Code') }}" required=""
+                                          inputmode="numeric" pattern="^[0-9]{4}$" maxlength="4"
                                           value="{{ Auth::check() ? Auth::user()->zip : '' }}">
                                     </div>
                                     <div class="col-lg-6">
@@ -187,6 +197,7 @@
                                     <div class="col-lg-6">
                                        <input class="form-control ship_input" type="text"
                                           name="shipping_phone" id="shipingPhone_number"
+                                          inputmode="numeric" pattern="^(\\+216|216)?[0-9]{8}$" maxlength="12"
                                           placeholder="{{ __('Phone Number') }}">
                                     </div>
                                  </div>
@@ -198,6 +209,7 @@
                                     </div>
                                     <div class="col-lg-6">
                                        <input class="form-control ship_input" type="text" name="shipping_zip"
+                                          inputmode="numeric" pattern="^[0-9]{4}$" maxlength="4"
                                           id="shippingPostal_code" placeholder="{{ __('Postal Code') }}">
                                     </div>
                                  </div>
@@ -305,7 +317,7 @@
                                        <a href="javascript:;" id="step1-btn"
                                           class="mybtn1 mr-3">{{ __('Back') }}</a>
                                        <a href="javascript:;" id="step3-btn"
-                                          class="mybtn1">{{ __('Continue') }}</a>
+                                          class="mybtn1 {{ $gateways->count() === 0 ? 'disabled' : '' }}" {{ $gateways->count() === 0 ? 'aria-disabled="true"' : '' }}>{{ __('Continue') }}</a>
                                     </div>
                                  </div>
                               </div>
@@ -388,6 +400,11 @@
                                           </a>
                                           @endif
                                           @endforeach
+                                          @if($gateways->count() === 0)
+                                          <div class="alert alert-warning mt-2 mb-0">
+                                             {{ __('No payment methods are currently available. Please contact support or try again later.') }}
+                                          </div>
+                                          @endif
                                        </div>
                                     </div>
                                     <div class="col-lg-12">
@@ -419,7 +436,7 @@
                                        <a href="javascript:;" id="step2-btn"
                                           class="mybtn1 mr-3">{{ __('Back') }}</a>
                                        <button type="submit" id="final-btn"
-                                          class="mybtn1">{{ __('Continue') }}</button>
+                                          class="mybtn1" {{ $gateways->count() === 0 ? 'disabled' : '' }}>{{ __('Continue') }}</button>
                                     </div>
                                  </div>
                               </div>
@@ -779,20 +796,24 @@
 <script src="https://secure.mlstatic.com/sdk/javascript/v1/mercadopago.js"></script>
 <script src="https://www.2checkout.com/checkout/api/2co.min.js"></script>
 <script type="text/javascript">
-   $('a.payment:first').addClass('active');
+   var firstPayment = $('a.payment:first');
+   if(firstPayment.length){
+      firstPayment.addClass('active');
+      $('.checkoutform').attr('action', firstPayment.attr('data-form'));
+      $(firstPayment.attr('href')).load(firstPayment.data('href'));
 
-   $('.checkoutform').attr('action',$('a.payment:first').attr('data-form'));
-   $($('a.payment:first').attr('href')).load($('a.payment:first').data('href'));
-
-
-   	var show = $('a.payment:first').data('show');
-   	if(show != 'no') {
-   		$('.pay-area').removeClass('d-none');
-   	}
-   	else {
-   		$('.pay-area').addClass('d-none');
-   	}
-   $($('a.payment:first').attr('href')).addClass('active').addClass('show');
+      var show = firstPayment.data('show');
+      if(show != 'no') {
+         $('.pay-area').removeClass('d-none');
+      }
+      else {
+         $('.pay-area').addClass('d-none');
+      }
+      $(firstPayment.attr('href')).addClass('active').addClass('show');
+   } else {
+      $('.pay-area').addClass('d-none');
+      $('#final-btn').prop('disabled', true);
+   }
 </script>
 <script type="text/javascript">
    var coup = 0;
@@ -821,7 +842,7 @@
    $('#packing-title').val(pack_title);
 
    var ftotal = parseFloat($('#grandtotal').val()) + mship + mpack;
-   ftotal = parseFloat(ftotal).toFixed(parseFloat);
+   ftotal = parseFloat(ftotal).toFixed(2);
 
    		if(pos == 0){
    			$('#final-cost').html('{{ $curr->sign }}'+ftotal)
@@ -1208,7 +1229,7 @@
 
    // Step 2 btn DONE
 
-   $('#step1-btn').on('click',function(){
+	$('#step1-btn').on('click',function(){
    		$('#pills-step2').removeClass('active');
    		$('#pills-step1').addClass('active');
    		$('#pills-step1-tab').click();
@@ -1222,34 +1243,50 @@
    		$('#pills-step2-tab').click();
 
 
-   	});
+	});
 
+	function resolveCheckoutFormId(paymentKey, isFinalStep) {
+		if(paymentKey == 'paystack'){
+			return 'step1-form';
+		}
+		if(paymentKey == 'mercadopago'){
+			return 'mercadopago';
+		}
+		if(paymentKey == 'voguepay'){
+			return 'voguepay';
+		}
+		return isFinalStep ? 'twocheckout' : '';
+	}
 
+	function updateShippingSummary() {
+		var shipping_user  = !$('input[name="shipping_name"]').val() ? $('input[name="customer_name"]').val() : $('input[name="shipping_name"]').val();
+		var shipping_location  = !$('input[name="shipping_address"]').val() ? $('input[name="customer_address"]').val() : $('input[name="shipping_address"]').val();
+		var shipping_phone = !$('input[name="shipping_phone"]').val() ? $('input[name="customer_phone"]').val() : $('input[name="shipping_phone"]').val();
+		var shipping_email= !$('input[name="shipping_email"]').val() ? $('input[name="customer_email"]').val() : $('input[name="shipping_email"]').val();
 
-   	$('#step3-btn').on('click',function(){
+		$('#shipping_user').html('<i class="fas fa-user"></i>'+shipping_user);
+		$('#shipping_location').html('<i class="fas fas fa-map-marker-alt"></i>'+shipping_location);
+		$('#shipping_phone').html('<i class="fas fa-phone"></i>'+shipping_phone);
+		$('#shipping_email').html('<i class="fas fa-envelope"></i>'+shipping_email);
+	}
 
-   	 	if($('a.payment:first').data('val') == 'paystack'){
-   			$('.checkoutform').attr('id','step1-form');
-   		}
+	$('#step3-btn.disabled').on('click', function(e){
+		e.preventDefault();
+		return false;
+	});
 
-   		$('#pills-step2').removeClass('active');
-   		$('#pills-step3-tab').click();
-
-   		var shipping_user  = !$('input[name="shipping_name"]').val() ? $('input[name="name"]').val() : $('input[name="shipping_name"]').val();
-   		var shipping_location  = !$('input[name="shipping_address"]').val() ? $('input[name="address"]').val() : $('input[name="shipping_address"]').val();
-   		var shipping_phone = !$('input[name="shipping_phone"]').val() ? $('input[name="phone"]').val() : $('input[name="shipping_phone"]').val();
-   		var shipping_email= !$('input[name="shipping_email"]').val() ? $('input[name="email"]').val() : $('input[name="shipping_email"]').val();
-
-   		$('#shipping_user').html('<i class="fas fa-user"></i>'+shipping_user);
-   		$('#shipping_location').html('<i class="fas fas fa-map-marker-alt"></i>'+shipping_location);
-   		$('#shipping_phone').html('<i class="fas fa-phone"></i>'+shipping_phone);
-   		$('#shipping_email').html('<i class="fas fa-envelope"></i>'+shipping_email);
-
-   		$('#pills-step1-tab').addClass('active');
-   		$('#pills-step2-tab').addClass('active');
+	$('#step3-btn').on('click',function(){
+		var firstPayment = $('a.payment:first');
+		$('.checkoutform').attr('id', resolveCheckoutFormId(firstPayment.data('val'), true));
+		$('#pills-step3-tab').removeClass('disabled');
+		$('#pills-step2').removeClass('active');
+		$('#pills-step3-tab').click();
+		updateShippingSummary();
+		$('#pills-step1-tab').addClass('active');
+		$('#pills-step2-tab').addClass('active');
            $('#pills-step3').addClass('active');
 
-   	});
+	});
 
    	$('#final-btn').on('click',function(){
    		ck = 1;
@@ -1257,22 +1294,16 @@
 
 
 
-   	$('.payment').on('click',function(){
+	$('.payment').on('click',function(){
 
-   		if($(this).data('val') == 'paystack'){
-   			$('.checkoutform').attr('id','step1-form');
-   		}
-
-   		else if($(this).data('val') == 'mercadopago'){
-   			$('.checkoutform').attr('id','mercadopago');
-   			checkONE= 1;
-   		}
-   		else {
-   			$('.checkoutform').attr('id','');
-   		}
-   		$('.checkoutform').attr('action',$(this).attr('data-form'));
-           $('.payment').removeClass('active');
-           $(this).addClass('active');
+		var selectedPayment = $(this).data('val');
+		$('.checkoutform').attr('id', resolveCheckoutFormId(selectedPayment, false));
+		if(selectedPayment == 'mercadopago'){
+			checkONE= 1;
+		}
+		$('.checkoutform').attr('action',$(this).attr('data-form'));
+            $('.payment').removeClass('active');
+            $(this).addClass('active');
    		$('.pay-area #v-pills-tabContent .tab-pane.fade').not($(this).attr('href')).html('');
    		var show = $(this).attr('data-show');
    		if(show != 'no') {
@@ -1281,7 +1312,7 @@
    		else {
    			$('.pay-area').addClass('d-none');
    		}
-   		$($('#v-pills-tabContent .tap-pane').removeClass('active show'));
+		$($('#v-pills-tabContent .tab-pane').removeClass('active show'));
    		$($('#v-pills-tabContent #'+$(this).attr('aria-controls'))).addClass('active show').load($(this).attr('data-href'));
    	})
 
@@ -1293,7 +1324,7 @@
                    if(val == 0)
                    {
                    var handler = PaystackPop.setup({
-                     key: '{{$paystack['key']}}',
+                     key: '{{$paystack['key'] ?? ''}}',
                      email: $('input[name=customer_email]').val(),
                      amount: total * 100,
                      currency: "{{$curr->name}}",
@@ -1318,36 +1349,6 @@
 
 
    // Step 2 btn DONE
-
-
-
-   	$('#step3-btn').on('click',function(){
-   	 	if($('a.payment:first').data('val') == 'paystack'){
-   			$('.checkoutform').attr('id','step1-form');
-   		}
-   		else if($('a.payment:first').data('val') == 'voguepay'){
-   			$('.checkoutform').attr('id','voguepay');
-   		}
-   		else {
-   			$('.checkoutform').attr('id','twocheckout');
-   		}
-   		$('#pills-step3-tab').removeClass('disabled');
-   		$('#pills-step3-tab').click();
-
-   		var shipping_user  = !$('input[name="shipping_name"]').val() ? $('input[name="customer_name"]').val() : $('input[name="shipping_name"]').val();
-   		var shipping_location  = !$('input[name="shipping_address"]').val() ? $('input[name="customer_address"]').val() : $('input[name="shipping_address"]').val();
-   		var shipping_phone = !$('input[name="shipping_phone"]').val() ? $('input[name="customer_phone"]').val() : $('input[name="shipping_phone"]').val();
-   		var shipping_email= !$('input[name="shipping_email"]').val() ? $('input[name="customer_email"]').val() : $('input[name="shipping_email"]').val();
-
-   		$('#shipping_user').html('<i class="fas fa-user"></i>'+shipping_user);
-   		$('#shipping_location').html('<i class="fas fas fa-map-marker-alt"></i>'+shipping_location);
-   		$('#shipping_phone').html('<i class="fas fa-phone"></i>'+shipping_phone);
-   		$('#shipping_email').html('<i class="fas fa-envelope"></i>'+shipping_email);
-
-   		$('#pills-step1-tab').addClass('active');
-   		$('#pills-step2-tab').addClass('active');
-   	});
-
 
 
 

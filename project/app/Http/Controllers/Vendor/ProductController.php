@@ -468,7 +468,10 @@ class ProductController extends VendorBaseController
                     list(, $p_image)      = explode(',', $p_image);
                     $p_image = base64_decode($p_image);
                     $p_name = 'print_'.time().Str::random(8).'.png';
-                    file_put_contents('assets/images/products/'.$p_name, $p_image);
+                    if (!is_dir(public_path('assets/files/designs'))) {
+                        mkdir(public_path('assets/files/designs'), 0755, true);
+                    }
+                    file_put_contents(public_path('assets/files/designs/'.$p_name), $p_image);
                     $input['print_file'] = $p_name;
                 }
             }

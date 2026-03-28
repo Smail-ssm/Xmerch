@@ -200,9 +200,18 @@
                                         <a href="{{ route('admin-printer-show', $order->id) }}" class="action-btn outline">
                                             <i class="fas fa-eye"></i> View Details
                                         </a>
-                                        <a href="{{ route('admin-printer-start', $order->id) }}" class="action-btn primary">
-                                            <i class="fas fa-play"></i> Start Printing
-                                        </a>
+                                        @if(in_array($order->print_status, ['print_ready', 'pending_print']))
+                                        <form action="{{ route('admin-printer-start', $order->id) }}" method="POST" style="display:inline;">
+                                            @csrf
+                                            <button type="submit" class="action-btn primary">
+                                                <i class="fas fa-play"></i> Start Printing
+                                            </button>
+                                        </form>
+                                        @else
+                                        <button type="button" class="action-btn outline" disabled>
+                                            <i class="fas fa-cogs"></i> In Manufacturing
+                                        </button>
+                                        @endif
                                     </div>
                                 </div>
                             </div>

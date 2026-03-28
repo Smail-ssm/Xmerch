@@ -117,9 +117,10 @@ class FrontBaseController extends Controller
 
         // Set Counter
 
-        if(isset($_SERVER['HTTP_REFERER'])){
+        $serverName = $_SERVER['SERVER_NAME'] ?? null;
+        if(isset($_SERVER['HTTP_REFERER']) && $serverName){
             $referral = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST);
-            if ($referral != $_SERVER['SERVER_NAME']){
+            if ($referral != $serverName){
 
                 $brwsr = Counter::where('type','browser')->where('referral',$this->getOS());
                 if($brwsr->count() > 0){
@@ -164,7 +165,7 @@ class FrontBaseController extends Controller
 
     function getOS() {
 
-        $user_agent     =   $_SERVER['HTTP_USER_AGENT'];
+        $user_agent     =   $_SERVER['HTTP_USER_AGENT'] ?? '';
 
         $os_platform    =   "Unknown OS Platform";
 

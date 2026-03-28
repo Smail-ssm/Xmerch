@@ -331,14 +331,24 @@
 
                 {{-- Action Buttons --}}
                 <div class="action-buttons">
-                    @if(in_array($order->print_status, ['pending_print', 'print_ready', 'manufacturing']))
-                    <a href="{{ route('admin-printer-start', $order->id) }}" class="btn-start">
-                        <i class="fas fa-play"></i> Start Printing
-                    </a>
+                    @if(in_array($order->print_status, ['pending_print', 'print_ready']))
+                    <form action="{{ route('admin-printer-start', $order->id) }}" method="POST" style="width:100%;">
+                        @csrf
+                        <button type="submit" class="btn-start" style="width:100%;">
+                            <i class="fas fa-play"></i> Start Printing
+                        </button>
+                    </form>
+                    @elseif($order->print_status == 'manufacturing')
+                    <button type="button" class="btn-start" style="width:100%; opacity:0.7;" disabled>
+                        <i class="fas fa-cogs"></i> In Manufacturing
+                    </button>
                     @elseif($order->print_status == 'printing')
-                    <a href="{{ route('admin-printer-printed', $order->id) }}" class="btn-done">
-                        <i class="fas fa-check"></i> Mark as Printed
-                    </a>
+                    <form action="{{ route('admin-printer-printed', $order->id) }}" method="POST" style="width:100%;">
+                        @csrf
+                        <button type="submit" class="btn-done" style="width:100%;">
+                            <i class="fas fa-check"></i> Mark as Printed
+                        </button>
+                    </form>
                     @elseif($order->print_status == 'printed')
                     <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
                         <a href="{{ route('admin-printer-label', $order->id) }}" target="_blank" class="btn-print" style="background:#000; color:#fff; text-align:center;">

@@ -6,10 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Generalsetting;
 use App\Models\Currency;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Schema;
 use DB;
 
 class Product extends Model
 {
+  protected static $hasIsPodColumn = null;
+  protected static $hasProductionCapColumn = null;
 
   protected $fillable = ['user_id','category_id','product_type','affiliate_link','sku', 'subcategory_id', 'childcategory_id', 'attributes', 'name', 'photo', 'size','size_qty','size_price', 'color', 'details','price','previous_price','stock','policy','status', 'views','tags','featured','best','top','hot','latest','big','trending','sale','features','colors','product_condition','ship','meta_tag','meta_description','youtube','type','file','license','license_qty','link','platform','region','licence_type','measure','discount_date','is_discount','whole_sell_qty','whole_sell_discount','catalog_id','slug','language_id','flash_count','hot_count','new_count','sale_count','best_seller_count','popular_count','top_rated_count','big_save_count','trending_count','page_count','seller_product_count','wishlist_count','vendor_page_count','min_price','max_price','product_page','post_count','minimum_qty','preordered','language_id','color_all','size_all','stock_check', 'production_cap', 'is_pod', 'print_file', 'design_data', 'mockup_template_id'];
 
@@ -620,6 +623,10 @@ class Product extends Model
 
     public function scopePod($query)
     {
+        if (!static::hasIsPodColumn()) {
+            return $query->whereRaw('1 = 0');
+        }
+
         return $query->where('is_pod', 1);
     }
 
@@ -650,6 +657,39 @@ class Product extends Model
 
     public function scopeTraditional($query)
     {
+        if (!static::hasIsPodColumn()) {
+            return $query;
+        }
+
         return $query->where('is_pod', 0);
+    }
+
+    public function scopeWithPositiveProductionCap($query)
+    {
+        if (!static::hasProductionCapColumn()) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->where('production_cap', '>', 0);
+    }
+
+    public static function hasIsPodColumn()
+    {
+        if (static::$hasIsPodColumn === null) {
+            $table = (new static())->getTable();
+            static::$hasIsPodColumn = Schema::hasTable($table) && Schema::hasColumn($table, 'is_pod');
+        }
+
+        return static::$hasIsPodColumn;
+    }
+
+    public static function hasProductionCapColumn()
+    {
+        if (static::$hasProductionCapColumn === null) {
+            $table = (new static())->getTable();
+            static::$hasProductionCapColumn = Schema::hasTable($table) && Schema::hasColumn($table, 'production_cap');
+        }
+
+        return static::$hasProductionCapColumn;
     }
 }

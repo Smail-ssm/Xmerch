@@ -18,21 +18,30 @@ use Illuminate\Support\Facades\Session;
 
 class AppServiceProvider extends ServiceProvider
 {
+    protected function loadGeneralSettings()
+    {
+        $gs = DB::table('generalsettings')->first();
+
+        if (!$gs) {
+            $gs = (object) [];
+        }
+
+        if (!property_exists($gs, 'pod_designer_mode')) {
+            $gs->pod_designer_mode = 0;
+        }
+
+        return $gs;
+    }
+
     public function boot()
     {
         Paginator::useBootstrap();
-        \Cache::flush('generalsettings');
 
 
         view()->composer('*',function($settings){
 
             $settings->with('gs', cache()->remember('generalsettings', now()->addDay(), function () {
-                return DB::table('generalsettings')->first();
-            }));
-
-
-            $settings->with('langg', cache()->remember('generalsettings', now()->addDay(), function () {
-                return DB::table('generalsettings')->first();
+                return $this->loadGeneralSettings();
             }));
 
             $settings->with('ps', cache()->remember('pagesettings', now()->addDay(), function () {
@@ -52,8 +61,9 @@ class AppServiceProvider extends ServiceProvider
 
             if (Session::has('currency'))
             {
-                $settings->with('curr',  cache()->remember('session_currency', now()->addDay(), function () {
-                    return Currency::find(Session::get('currency'));
+                $currencyId = (int) Session::get('currency');
+                $settings->with('curr',  cache()->remember('session_currency_'.$currencyId, now()->addDay(), function () use ($currencyId) {
+                    return Currency::find($currencyId) ?: Currency::where('is_default','=',1)->first();
                 }));
             }
             else
@@ -65,13 +75,14 @@ class AppServiceProvider extends ServiceProvider
 
              if (Session::has('language'))
             {
-                $settings->with('langg',  cache()->remember('session_language', now()->addDay(), function () {
-                    return Language::find(Session::get('language'));
+                $languageId = (int) Session::get('language');
+                $settings->with('langg',  cache()->remember('session_language_'.$languageId, now()->addDay(), function () use ($languageId) {
+                    return Language::find($languageId) ?: Language::where('is_default','=',1)->first();
                 }));
             }
             else
             {
-                $settings->with('langg', cache()->remember('session_language', now()->addDay(), function () {
+                $settings->with('langg', cache()->remember('default_language', now()->addDay(), function () {
                     return Language::where('is_default','=',1)->first();
                 }));
             }

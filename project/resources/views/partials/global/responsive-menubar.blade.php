@@ -1,9 +1,9 @@
 <div class="main-nav d-lg-block d-none py-3">
     <div class="container-fluid px-lg-5">
-        <div class="row">
+        <div class="row align-items-center">
             <div class="col-xl-5 col-md-8">
-                <nav class="navbar navbar-expand-lg nav-dark nav-primary-hover nav-line-active">
-                    <a class="navbar-brand" href="{{ route('front.index') }}">
+                <nav class="navbar navbar-expand-lg nav-dark nav-primary-hover nav-line-active main-nav-shell">
+                    <a class="navbar-brand header-brand" href="{{ route('front.index') }}">
                         @if(file_exists(base_path('../assets/images/'.$gs->logo)))
                         <img src="{{asset('assets/images/'.$gs->logo)}}" alt="{{ $gs->title }}">
                         @else
@@ -14,7 +14,7 @@
                     <i class="flaticon-menu-2 flat-small text-primary"></i>
                     </button>
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul class="navbar-nav ms-md-5">
+                        <ul class="navbar-nav ms-md-5 main-menu-list">
                             <li class="nav-item dropdown {{ request()->path() == '/' ? 'active':''}}">
                                 <a class="nav-link dropdown-toggle" href="{{ route('front.index') }}">{{ __('Home') }}</a>
                             </li>
@@ -66,13 +66,13 @@
                 </nav>
             </div>
             <div class="col-xl-7 col-md-4">
-                <div class="margin-right-1 d-flex align-items-center justify-content-end h-100">
+                <div class="margin-right-1 d-flex align-items-center justify-content-end h-100 header-right-cluster">
                     
                      <!-- Moved Top Header Items -->
 
 
-                    <div class="product-search-one flex-grow-1 global-search touch-screen-view">
-                        <form id="searchForm" class="search-form form-inline search-pill-shape" action="{{ route('front.category', [Request::route('category'),Request::route('subcategory'),Request::route('childcategory')]) }}" method="GET">
+                    <div class="product-search-one flex-grow-1 global-search touch-screen-view top-search-wrap">
+                        <form id="searchForm" class="search-form form-inline search-pill-shape js-search-form" action="{{ route('front.category', [Request::route('category'),Request::route('subcategory'),Request::route('childcategory')]) }}" method="GET">
 
                             @if (!empty(request()->input('sort')))
                             <input type="hidden" name="sort" value="{{ request()->input('sort') }}">
@@ -85,7 +85,7 @@
                             @endif
                             <input type="text" id="prod_name" class="col form-control search-field " name="search" placeholder="Search Product For" value="{{ request()->input('search') }}">
                             <div class=" categori-container select-appearance-none " id="catSelectForm">
-                                <select name="category" class="form-control categoris " id="category_select">
+                                <select name="category" class="form-control categoris js-category-select" id="category_select">
                                     <option selected="">{{ __('All Categories') }}</option>
                                     @foreach(DB::table('categories')->where('language_id',$langg->id)->where('status',1)->get() as $data)
                                      <option value="{{ $data->slug }}" {{ Request::route('category') == $data->slug ? 'selected' : '' }}>
@@ -107,7 +107,7 @@
                      <!-- Moved Top Header Items (Post-Search) -->
                      <div class="d-none d-xl-flex align-items-center ms-3 me-3 header-integrated-items">
                          
-                        <div class="language-selector nice-select p-0 border-0 bg-transparent me-2" style="height:auto; min-height:auto; display:flex; align-items:center;">
+                        <div class="language-selector nice-select p-0 border-0 bg-transparent me-2 header-language-chip">
                               <i class="fas fa-globe-americas me-1 text-muted"></i>
                               <select name="language" class="language selectors nice bg-transparent border-0">
                               @foreach(DB::table('languages')->get() as $language)
@@ -126,17 +126,18 @@
                            <div class="sell-btn-wrapper d-flex align-items-center">
                               @if(Auth::check())
                                  @if(Auth::guard('web')->user()->is_vendor == 2)
-                                 <a href="{{ route('vendor.dashboard') }}" class="btn btn-sm btn-primary rounded-pill px-3 py-1 font-12 fw-bold"> {{ __('Sell') }}</a>
+                                 <a href="{{ route('vendor.dashboard') }}" class="btn btn-sm rounded-pill px-3 py-1 font-12 fw-bold top-sell-btn"> {{ __('Sell') }}</a>
                                  @else
-                                 <a href="{{ route('user-package') }}" class="btn btn-sm btn-primary rounded-pill px-3 py-1 font-12 fw-bold"> {{ __('Sell') }}</a>
+                                 <a href="{{ route('user-package') }}" class="btn btn-sm rounded-pill px-3 py-1 font-12 fw-bold top-sell-btn"> {{ __('Sell') }}</a>
                                  @endif
                               @else
-                                 <a href="{{ route('vendor.login') }}" class="btn btn-sm btn-primary rounded-pill px-3 py-1 font-12 fw-bold"> {{ __('Sell') }}</a>
+                                 <a href="{{ route('vendor.login') }}" class="btn btn-sm rounded-pill px-3 py-1 font-12 fw-bold top-sell-btn"> {{ __('Sell') }}</a>
                               @endif
                            </div>
                         @endif
 
                      </div>
+                    <div class="header-icon-actions d-flex align-items-center">
 
                     <div class="sign-in my-account-dropdown position-relative">
                         <a href="my-account.html" class="has-dropdown d-flex align-items-center text-decoration-none">
@@ -210,6 +211,7 @@
                             </div>
                         </a>
                         @include('load.cart')
+                    </div>
                     </div>
                 </div>
             </div>
@@ -417,7 +419,7 @@
 			</div>
 			<div class="col-xxl-7 col-xl-6 col-lg-6 col-12 order-lg-2">
                 <div class="product-search-one">
-                    <form id="searchForm" class="search-form form-inline search-pill-shape" action="{{ route('front.category', [Request::route('category'),Request::route('subcategory'),Request::route('childcategory')]) }}" method="GET">
+                    <form id="searchForm2" class="search-form form-inline search-pill-shape js-search-form" action="{{ route('front.category', [Request::route('category'),Request::route('subcategory'),Request::route('childcategory')]) }}" method="GET">
 
                         @if (!empty(request()->input('sort')))
                         <input type="hidden" name="sort" value="{{ request()->input('sort') }}">
@@ -430,8 +432,8 @@
                         @endif
                         <input type="text" id="prod_name2" class="col form-control search-field" name="search" placeholder="Search Product For" value="{{ request()->input('search') }}">
 
-                        <div class="select-appearance-none categori-container" id="catSelectForm">
-                            <select name="category" class="form-control categoris" id="category_select">
+                        <div class="select-appearance-none categori-container" id="catSelectForm2">
+                            <select name="category" class="form-control categoris js-category-select" id="category_select2">
                                 <option selected="">{{ __('All Categories') }}</option>
                                 @foreach(DB::table('categories')->where('language_id',$langg->id)->where('status',1)->get() as $data)
                                  <option value="{{ $data->slug }}" {{ Request::route('category') == $data->slug ? 'selected' : '' }}>

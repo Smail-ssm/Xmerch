@@ -17,6 +17,37 @@ use Session;
 
 class CheckoutController extends FrontBaseController
 {
+    /**
+     * Toggle Tunisia-only checkout behavior via environment.
+     */
+    protected function isTunisiaOnlyMode()
+    {
+        return filter_var(env('TN_ONLY_MODE', false), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Checkout gateways allowed for Tunisia-only mode.
+     */
+    protected function tunisiaGatewayKeywords()
+    {
+        return ['cod', 'flouci', 'konnect', 'paymee', 'd17'];
+    }
+
+    /**
+     * Filter configured gateways for the active market mode.
+     */
+    protected function filterGatewaysForMarket($gateways)
+    {
+        if (!$this->isTunisiaOnlyMode()) {
+            return $gateways;
+        }
+
+        $allowed = $this->tunisiaGatewayKeywords();
+        return $gateways->filter(function ($gateway) use ($allowed) {
+            return in_array(strtolower((string) $gateway->keyword), $allowed, true);
+        })->values();
+    }
+
     // Loading Payment Gateways
 
     public function loadpayment($slug1,$slug2)
@@ -27,6 +58,13 @@ class CheckoutController extends FrontBaseController
         $gateway = '';
         if($pay_id != 0) {
             $gateway = PaymentGateway::findOrFail($pay_id);
+            if ($this->isTunisiaOnlyMode()) {
+                $allowed = $this->tunisiaGatewayKeywords();
+                $keyword = strtolower((string) $gateway->keyword);
+                if (!in_array($keyword, $allowed, true)) {
+                    return redirect()->route('front.checkout')->with('unsuccess', __('This payment method is not available in Tunisia mode.'));
+                }
+            }
         }
         return view('load.payment',compact('payment','pay_id','gateway','curr'));
     }
@@ -65,13 +103,13 @@ class CheckoutController extends FrontBaseController
         $vendor_shipping_id = 0;
         $vendor_packing_id = 0;
         $curr = $this->curr;
-        $gateways =  PaymentGateway::scopeHasGateway($this->curr->id);
+        $gateways = $this->filterGatewaysForMarket(PaymentGateway::scopeHasGateway($this->curr->id));
         $pickups =  DB::table('pickups')->whereLanguageId($this->language->id)->get();
         $oldCart = Session::get('cart');
         $cart = new Cart($oldCart);
         $products = $cart->items;
         $paystack = PaymentGateway::whereKeyword('paystack')->first();
-        $paystackData = $paystack->convertAutoData();
+        $paystackData = $paystack ? $paystack->convertAutoData() : [];
         // $voguepay = PaymentGateway::whereKeyword('voguepay')->first();
         // $voguepayData = $voguepay->convertAutoData();
         // If a user is Authenticated then there is no problm user can go for checkout
@@ -223,6 +261,15 @@ class CheckoutController extends FrontBaseController
 
     public function getState($country_id)
     {
+        if ($this->isTunisiaOnlyMode()) {
+            $tnCountry = DB::table('countries')
+                ->where('status', 1)
+                ->whereIn('country_name', ['Tunisia', 'Tunisie'])
+                ->first();
+            if ($tnCountry) {
+                $country_id = $tnCountry->id;
+            }
+        }
 
         $states = State::where('country_id',$country_id)->get();
 

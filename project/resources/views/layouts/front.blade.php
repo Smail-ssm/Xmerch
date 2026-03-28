@@ -532,6 +532,167 @@
             border-color: var(--theme-primary) !important;
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
         }
+
+        /* Desktop Header Cleanup */
+        .main-nav {
+            position: relative;
+            z-index: 20;
+        }
+
+        .main-nav .main-nav-shell {
+            width: 100%;
+        }
+
+        .main-nav .header-brand {
+            margin-right: 20px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .main-nav .header-brand img {
+            max-height: 88px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .main-nav .main-menu-list {
+            gap: 6px;
+        }
+
+        .main-nav .main-menu-list .nav-link {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            padding: 10px 11px;
+            border-radius: 10px;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .main-nav .main-menu-list .nav-item.active > .nav-link,
+        .main-nav .main-menu-list .nav-link:hover {
+            background: rgba(255, 255, 255, 0.45);
+        }
+
+        .main-nav .header-right-cluster {
+            gap: 12px;
+        }
+
+        .main-nav .top-search-wrap {
+            max-width: 680px;
+            min-width: 320px;
+        }
+
+        .main-nav .top-search-wrap .search-form {
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(16, 24, 40, 0.08);
+            box-shadow: 0 10px 24px rgba(16, 24, 40, 0.08);
+        }
+
+        .main-nav .top-search-wrap input.search-field {
+            padding-left: 20px;
+        }
+
+        .main-nav .top-search-wrap .search-submit {
+            background: #111827;
+            border-top-right-radius: 999px;
+            border-bottom-right-radius: 999px;
+        }
+
+        .main-nav .top-search-wrap .categori-container {
+            min-width: 185px;
+            border-left: 1px solid rgba(16, 24, 40, 0.1);
+        }
+
+        .main-nav .header-integrated-items {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(16, 24, 40, 0.08);
+            border-radius: 999px;
+            padding: 5px 10px;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            margin-left: 8px !important;
+            margin-right: 2px !important;
+        }
+
+        .main-nav .header-language-chip {
+            min-height: auto;
+            height: auto;
+            display: flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 0 4px;
+        }
+
+        .main-nav .top-sell-btn {
+            background: #1f2937;
+            color: #fff;
+            border: 1px solid transparent;
+            font-size: 12px;
+        }
+
+        .main-nav .top-sell-btn:hover {
+            background: #111827;
+            color: #fff;
+        }
+
+        .main-nav .header-icon-actions {
+            gap: 8px;
+        }
+
+        .main-nav .header-icon-actions .sign-in > a,
+        .main-nav .header-icon-actions .search-view > a,
+        .main-nav .header-icon-actions .header-cart-1 .cart-icon {
+            width: 44px;
+            height: 44px;
+            line-height: 44px;
+            border: 1px solid rgba(16, 24, 40, 0.1);
+            background: rgba(255, 255, 255, 0.94);
+            box-shadow: 0 6px 14px rgba(16, 24, 40, 0.08);
+        }
+
+        .main-nav .header-icon-actions .header-cart-1 .cart .cart-wrap {
+            display: none !important;
+        }
+
+        .main-nav .header-icon-actions [class*="header-cart-"] .cart .cart-icon .header-cart-count {
+            width: 18px;
+            height: 18px;
+            line-height: 18px;
+            font-size: 10px;
+            top: -4px;
+            right: -4px;
+            left: auto;
+        }
+
+        .main-nav .header-icon-actions .sign-in > a i {
+            font-size: 28px !important;
+        }
+
+        @media (max-width: 1599px) {
+            .main-nav .header-brand img {
+                max-height: 76px;
+            }
+
+            .main-nav .main-menu-list .nav-link {
+                font-size: 13px;
+                padding: 9px 9px;
+            }
+
+            .main-nav .top-search-wrap {
+                min-width: 280px;
+            }
+        }
+
+        @media (max-width: 1399px) {
+            .main-nav .header-integrated-items {
+                display: none !important;
+            }
+
+            .main-nav .top-search-wrap {
+                max-width: 560px;
+            }
+        }
     </style>
 
     @yield('css')

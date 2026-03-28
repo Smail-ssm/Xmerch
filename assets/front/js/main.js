@@ -212,6 +212,23 @@
 					}
 					$this.find("button.submit-btn").prop("disabled", false);
 				},
+				error: function (xhr) {
+					$this.find(".alert-info").hide();
+					$this.find(".alert-success").hide();
+					$this.find(".alert-danger").addClass("d-flex").show();
+
+					if (xhr && xhr.status === 419) {
+						$this
+							.find(".alert-danger p")
+							.html("Session expired. Please refresh and try again.");
+					} else {
+						$this
+							.find(".alert-danger p")
+							.html("Login failed. Please try again.");
+					}
+
+					$this.find("button.submit-btn").prop("disabled", false);
+				},
 			});
 		});
 		// MODAL LOGIN FORM ENDS
@@ -251,12 +268,12 @@
 			});
 		});
 
-		$("#category_select").on("change", function () {
+		$(document).on("change", ".js-category-select", function () {
 			var val = $(this).val();
 			$("#category_id").val(val);
-			$("#searchForm").attr(
+			$(this).closest("form").attr(
 				"action",
-				mainurl + "/category/" + $(this).val()
+				mainurl + "/category/" + val
 			);
 		});
 
@@ -1182,15 +1199,6 @@
 		}
 
 		//**************************** GLOBAL CAPCHA ENDS****************************************
-
-		$("#category_select").on("change", function () {
-			var val = $(this).val();
-			$("#category_id").val(val);
-			$("#searchForm").attr(
-				"action",
-				mainurl + "/category/" + $(this).val()
-			);
-		});
 
 		// REPLY FORM
 

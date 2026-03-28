@@ -1053,6 +1053,21 @@ $("#loginform").on('submit',function(e){
             window.location = data;
           }
           $('button.submit-btn').prop('disabled',false);
+       },
+       error:function(xhr)
+       {
+          $('.alert-success').hide();
+          $('.alert-info').hide();
+          $('.alert-danger').show();
+          $('.alert-danger ul').html('');
+
+          if(xhr && xhr.status === 419) {
+            $('.alert-danger p').html('Session expired. Please refresh and try again.');
+          } else {
+            $('.alert-danger p').html('Login failed. Please try again.');
+          }
+
+          $('button.submit-btn').prop('disabled',false);
        }
 
       });

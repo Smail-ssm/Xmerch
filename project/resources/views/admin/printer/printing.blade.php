@@ -48,9 +48,12 @@
                                             <a href="{{ route('admin-printer-show', $order->id) }}" class="btn btn-sm btn-info">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{{ route('admin-printer-printed', $order->id) }}" class="btn btn-sm btn-success">
-                                                <i class="fas fa-check"></i> Done
-                                            </a>
+                                            <form action="{{ route('admin-printer-printed', $order->id) }}" method="POST" style="display:inline;">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-success">
+                                                    <i class="fas fa-check"></i> Done
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                     @endforeach

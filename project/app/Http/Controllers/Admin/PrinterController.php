@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Order;
+use App\Models\PrintJob;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Auth;
@@ -109,9 +110,29 @@ class PrinterController extends Controller
     public function startPrint($id)
     {
         $order = Order::findOrFail($id);
+
+        if ($order->status !== 'processing') {
+            return redirect()->back()->with('error', 'Order is not in processing state');
+        }
+
+        if (!in_array($order->print_status, [Order::PRINT_STATUS_PRINT_READY, Order::PRINT_STATUS_PENDING])) {
+            return redirect()->back()->with('error', 'Order must be Print Ready before starting');
+        }
+
+        $printerId = Auth::guard('admin')->id();
+
         $order->print_status = Order::PRINT_STATUS_PRINTING;
-        $order->printer_id = Auth::guard('admin')->id();
+        $order->printer_id = $printerId;
         $order->save();
+
+        // Keep line-item print jobs aligned when starting at order level.
+        PrintJob::where('order_id', $order->id)
+            ->where('status', PrintJob::STATUS_QUEUED)
+            ->update([
+                'status' => PrintJob::STATUS_PRINTING,
+                'printer_id' => $printerId,
+                'started_at' => now(),
+            ]);
 
         return redirect()->back()->with('success', 'Order marked as printing');
     }
@@ -122,9 +143,35 @@ class PrinterController extends Controller
     public function markPrinted($id)
     {
         $order = Order::findOrFail($id);
+
+        if ($order->print_status !== Order::PRINT_STATUS_PRINTING) {
+            return redirect()->back()->with('error', 'Only printing orders can be marked as printed');
+        }
+
+        $now = now();
+
         $order->print_status = Order::PRINT_STATUS_PRINTED;
-        $order->printed_at = now();
+        $order->printed_at = $now;
         $order->save();
+
+        // If staff closes the order at this level, close remaining line-item jobs too.
+        $jobsToComplete = PrintJob::where('order_id', $order->id)
+            ->whereIn('status', [
+                PrintJob::STATUS_QUEUED,
+                PrintJob::STATUS_PRINTING,
+                PrintJob::STATUS_ON_HOLD,
+                PrintJob::STATUS_FAILED,
+            ])
+            ->get();
+
+        foreach ($jobsToComplete as $job) {
+            $actualTime = $job->started_at ? $now->diffInMinutes($job->started_at) : null;
+            $job->update([
+                'status' => PrintJob::STATUS_COMPLETED,
+                'completed_at' => $now,
+                'actual_time_minutes' => $actualTime,
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Order marked as printed')
                          ->with('auto_print_label', route('admin-printer-label', $id));
@@ -136,6 +183,11 @@ class PrinterController extends Controller
     public function markShipped(Request $request, $id)
     {
         $order = Order::findOrFail($id);
+
+        if ($order->print_status !== Order::PRINT_STATUS_PRINTED) {
+            return redirect()->back()->with('error', 'Order must be printed before shipping');
+        }
+
         $order->print_status = Order::PRINT_STATUS_SHIPPED;
         $order->shipped_at = now();
         $order->status = 'completed';
@@ -152,11 +204,31 @@ class PrinterController extends Controller
         }
         
         if (!empty($ids)) {
-            Order::whereIn('id', $ids)->update([
+            $eligibleIds = Order::whereIn('id', $ids)
+                ->where('status', 'processing')
+                ->whereIn('print_status', [Order::PRINT_STATUS_PRINT_READY, Order::PRINT_STATUS_PENDING])
+                ->pluck('id')
+                ->all();
+
+            $updated = Order::whereIn('id', $eligibleIds)
+                ->update([
                 'print_status' => Order::PRINT_STATUS_PRINTING,
                 'printer_id' => Auth::guard('admin')->id()
             ]);
-            return redirect()->back()->with('success', count($ids) . ' orders marked as printing');
+
+            if ($updated > 0) {
+                PrintJob::whereIn('order_id', $eligibleIds)
+                    ->where('status', PrintJob::STATUS_QUEUED)
+                    ->update([
+                        'status' => PrintJob::STATUS_PRINTING,
+                        'printer_id' => Auth::guard('admin')->id(),
+                        'started_at' => now(),
+                    ]);
+
+                return redirect()->back()->with('success', $updated . ' orders marked as printing');
+            }
+
+            return redirect()->back()->with('error', 'No eligible orders selected for printing');
         }
 
         return redirect()->back()->with('error', 'No orders selected');
@@ -170,11 +242,34 @@ class PrinterController extends Controller
         }
         
         if (!empty($ids)) {
-            Order::whereIn('id', $ids)->update([
+            $eligibleIds = Order::whereIn('id', $ids)
+                ->where('print_status', Order::PRINT_STATUS_PRINTING)
+                ->pluck('id')
+                ->all();
+
+            $updated = Order::whereIn('id', $eligibleIds)
+                ->update([
                 'print_status' => Order::PRINT_STATUS_PRINTED,
                 'printed_at' => now()
             ]);
-            return redirect()->back()->with('success', count($ids) . ' orders marked as printed');
+
+            if ($updated > 0) {
+                PrintJob::whereIn('order_id', $eligibleIds)
+                    ->whereIn('status', [
+                        PrintJob::STATUS_QUEUED,
+                        PrintJob::STATUS_PRINTING,
+                        PrintJob::STATUS_ON_HOLD,
+                        PrintJob::STATUS_FAILED,
+                    ])
+                    ->update([
+                        'status' => PrintJob::STATUS_COMPLETED,
+                        'completed_at' => now(),
+                    ]);
+
+                return redirect()->back()->with('success', $updated . ' orders marked as printed');
+            }
+
+            return redirect()->back()->with('error', 'No printing orders selected');
         }
 
         return redirect()->back()->with('error', 'No orders selected');

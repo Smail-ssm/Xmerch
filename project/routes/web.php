@@ -395,28 +395,6 @@ Route::delete('/state/delete/{id}', 'Admin\StateController@delete')->name('admin
 
   //------------ ADMIN POD PRICING SECTION ENDS------------
 
-  //------------ ADMIN PRINT JOB SECTION ------------
-  
-  Route::prefix('admin')->middleware('auth:admin')->group(function() {
-      Route::get('/printjobs', 'Admin\PrintJobController@index')->name('admin-printjob-index');
-      Route::get('/printjobs/queue', 'Admin\PrintJobController@queue')->name('admin-printjob-queue');
-      Route::get('/printjobs/printing', 'Admin\PrintJobController@printing')->name('admin-printjob-printing');
-      Route::get('/printjobs/completed', 'Admin\PrintJobController@completed')->name('admin-printjob-completed');
-      Route::get('/printjobs/failed', 'Admin\PrintJobController@failed')->name('admin-printjob-failed');
-      Route::get('/printjobs/datatables/{status}', 'Admin\PrintJobController@datatables')->name('admin-printjob-datatables');
-      Route::get('/printjobs/{id}', 'Admin\PrintJobController@show')->name('admin-printjob-show');
-      Route::post('/printjobs/{id}/start', 'Admin\PrintJobController@start')->name('admin-printjob-start');
-      Route::post('/printjobs/{id}/complete', 'Admin\PrintJobController@complete')->name('admin-printjob-complete');
-      Route::post('/printjobs/{id}/fail', 'Admin\PrintJobController@fail')->name('admin-printjob-fail');
-      Route::post('/printjobs/{id}/hold', 'Admin\PrintJobController@hold')->name('admin-printjob-hold');
-      Route::post('/printjobs/{id}/resume', 'Admin\PrintJobController@resume')->name('admin-printjob-resume');
-      Route::post('/printjobs/{id}/assign', 'Admin\PrintJobController@assign')->name('admin-printjob-assign');
-      Route::post('/printjobs/bulk', 'Admin\PrintJobController@bulkAction')->name('admin-printjob-bulk');
-      Route::get('/printjobs/capacity/stats', 'Admin\PrintJobController@capacityStats')->name('admin-printjob-capacity');
-  });
-
-  //------------ ADMIN PRINT JOB SECTION ENDS ------------
-
   //------------ ADMIN PRINTER SECTION (POD Manufacturing) ------------
 
   Route::group(['middleware'=>'permissions:print_production'],function(){
@@ -427,8 +405,8 @@ Route::delete('/state/delete/{id}', 'Admin\StateController@delete')->name('admin
     Route::get('/printer/ready-to-ship', 'Admin\PrinterController@readyToShip')->name('admin-printer-ready');
     Route::get('/printer/shipped', 'Admin\PrinterController@shipped')->name('admin-printer-shipped');
     Route::get('/printer/order/{id}', 'Admin\PrinterController@show')->name('admin-printer-show');
-    Route::get('/printer/start/{id}', 'Admin\PrinterController@startPrint')->name('admin-printer-start');
-    Route::get('/printer/mark-printed/{id}', 'Admin\PrinterController@markPrinted')->name('admin-printer-printed');
+    Route::post('/printer/start/{id}', 'Admin\PrinterController@startPrint')->name('admin-printer-start');
+    Route::post('/printer/mark-printed/{id}', 'Admin\PrinterController@markPrinted')->name('admin-printer-printed');
     Route::post('/printer/mark-shipped/{id}', 'Admin\PrinterController@markShipped')->name('admin-printer-shipped-action');
     Route::post('/printer/batch-start', 'Admin\PrinterController@batchStartPrint')->name('admin-printer-batch-start');
     Route::post('/printer/batch-printed', 'Admin\PrinterController@batchMarkPrinted')->name('admin-printer-batch-printed');
@@ -455,7 +433,7 @@ Route::delete('/state/delete/{id}', 'Admin\StateController@delete')->name('admin
     
     // Manufacturing Order Actions
     Route::get('/manufacturing/order/{id}', 'Admin\\ManufacturingController@showOrder')->name('admin-manufacturing-show');
-    Route::get('/manufacturing/mark-ready/{id}', 'Admin\\ManufacturingController@markPrintReady')->name('admin-manufacturing-mark-ready');
+    Route::post('/manufacturing/mark-ready/{id}', 'Admin\\ManufacturingController@markPrintReady')->name('admin-manufacturing-mark-ready');
     Route::post('/manufacturing/batch-ready', 'Admin\\ManufacturingController@batchMarkPrintReady')->name('admin-manufacturing-batch-ready');
 
   });
@@ -1036,7 +1014,7 @@ Route::get('/general-settings/deal_of_the_day', 'Admin\GeneralSettingController@
 
   // FEATURE SECTION
   Route::get('/products/feature/{id}', 'Admin\ProductController@feature')->name('admin-prod-feature');
-  Route::post('/products/feature/{id}', 'Admin\ProductController@featuresubmit')->name('admin-prod-feature');
+  Route::post('/products/feature/{id}', 'Admin\ProductController@featuresubmit')->name('admin-prod-feature-submit');
   // FEATURE SECTION ENDS
 
   // GALLERY SECTION ------------
@@ -1358,7 +1336,7 @@ Route::get('/forgot','Auth\User\ForgotController@index')->name('user.forgot');
     // User Wishlist Ends
 
     // User Review
-    Route::post('/review/submit','User\UserController@reviewsubmit')->name('front.review.submit');
+    Route::post('/review/submit','User\UserController@reviewsubmit')->name('user.review.submit');
     // User Review Ends
 
     // User Orders

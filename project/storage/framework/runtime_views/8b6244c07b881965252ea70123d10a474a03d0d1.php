@@ -1,0 +1,1 @@
+<?php echo clean($email_body, array('Attr.EnableID' => true)); ?><?php /**PATH C:\laragon\www\xmerch\project\resources\views\admin\email\mailbody.blade.php ENDPATH**/ ?>

@@ -42,10 +42,10 @@
                             </div>
                             <div class="col-lg-6">
                                 <div class="action-list">
-                                    <select class="process select droplinks {{ $gs->pod_designer_mode == 1 ? 'drop-success' : 'drop-danger' }}">
-                                      <option data-val="1" value="{{route('admin-gs-status',['pod_designer_mode',1])}}" {{ $gs->pod_designer_mode == 1 ? 'selected' : '' }}>{{ __('Activated') }}</option>
-                                      <option data-val="0" value="{{route('admin-gs-status',['pod_designer_mode',0])}}" {{ $gs->pod_designer_mode == 0 ? 'selected' : '' }}>{{ __('Deactivated') }}</option>
-                                    </select>
+                                            <select class="process select droplinks {{ ($gs->pod_designer_mode ?? 0) == 1 ? 'drop-success' : 'drop-danger' }}">
+                                                <option data-val="1" value="{{route('admin-gs-status',['pod_designer_mode',1])}}" {{ ($gs->pod_designer_mode ?? 0) == 1 ? 'selected' : '' }}>{{ __('Activated') }}</option>
+                                                <option data-val="0" value="{{route('admin-gs-status',['pod_designer_mode',0])}}" {{ ($gs->pod_designer_mode ?? 0) == 0 ? 'selected' : '' }}>{{ __('Deactivated') }}</option>
+                                            </select>
                                   </div>
                             </div>
                           </div>

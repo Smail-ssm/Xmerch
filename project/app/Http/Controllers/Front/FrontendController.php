@@ -31,7 +31,10 @@ class FrontendController extends FrontBaseController
 public function language($id)
 {
 
+    cache()->forget('session_language');
+    cache()->forget('session_language_'.(int) Session::get('language'));
     Session::put('language', $id);
+    cache()->forget('session_language_'.(int) $id);
     return redirect()->route('front.index');
 }
 
@@ -41,6 +44,8 @@ public function language($id)
 
 public function currency($id)
 {
+    cache()->forget('session_currency');
+    cache()->forget('session_currency_'.(int) Session::get('currency'));
 
     if (Session::has('coupon')) {
         Session::forget('coupon');
@@ -52,7 +57,7 @@ public function currency($id)
         Session::forget('coupon_percentage');
     }
     Session::put('currency', $id);
-    cache()->forget('session_currency');
+    cache()->forget('session_currency_'.(int) $id);
     return redirect()->back();
 }
 

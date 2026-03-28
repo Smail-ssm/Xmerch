@@ -18,8 +18,8 @@ class PrintJobController extends AdminBaseController
         $stats = [
             'queued' => PrintJob::queued()->count(),
             'printing' => PrintJob::printing()->count(),
-            'completed_today' => PrintJob::completed()->today()->count(),
-            'failed_today' => PrintJob::failed()->today()->count(),
+            'completed_today' => PrintJob::completed()->whereDate('completed_at', today())->count(),
+            'failed_today' => PrintJob::failed()->whereDate('updated_at', today())->count(),
         ];
 
         return view('admin.printjob.index', compact('stats'));
@@ -32,6 +32,10 @@ class PrintJobController extends AdminBaseController
     {
         $jobs = PrintJob::with(['order', 'product', 'printer'])
             ->queued()
+            ->whereHas('order', function ($query) {
+                $query->where('status', 'processing')
+                    ->whereIn('print_status', [Order::PRINT_STATUS_PRINT_READY, Order::PRINT_STATUS_PENDING]);
+            })
             ->priority()
             ->paginate(50);
 
@@ -103,10 +107,13 @@ class PrintJobController extends AdminBaseController
 
         return Datatables::of($datas)
             ->editColumn('order_id', function(PrintJob $data) {
+                if (!$data->order) {
+                    return 'N/A';
+                }
                 return '<a href="'.route('admin-order-show', $data->order_id).'">#'.$data->order->order_number.'</a>';
             })
             ->editColumn('product_id', function(PrintJob $data) {
-                return $data->product->name ?? 'N/A';
+                return optional($data->product)->name ?? 'N/A';
             })
             ->editColumn('status', function(PrintJob $data) {
                 return $data->status_badge;
@@ -124,17 +131,25 @@ class PrintJobController extends AdminBaseController
                 
                 $actions .= '<a href="' . route('admin-printjob-show', $data->id) . '"> <i class="fas fa-eye"></i> '.__('View Details').'</a>';
                 
-                if ($data->status === 'queued') {
-                    $actions .= '<a href="javascript:;" data-href="' . route('admin-printjob-start', $data->id) . '" class="start-print"><i class="fas fa-play"></i> '.__('Start Printing').'</a>';
-                    $actions .= '<a href="javascript:;" data-href="' . route('admin-printjob-hold', $data->id) . '" class="hold-print"><i class="fas fa-pause"></i> '.__('Put On Hold').'</a>';
+                if ($data->status === PrintJob::STATUS_QUEUED) {
+                    $canStart = $data->order
+                        && $data->order->status === 'processing'
+                        && in_array($data->order->print_status, [Order::PRINT_STATUS_PRINT_READY, Order::PRINT_STATUS_PENDING], true);
+
+                    if ($canStart) {
+                        $actions .= '<a href="javascript:;" data-href="' . route('admin-printjob-start', $data->id) . '" class="start-print"><i class="fas fa-play"></i> '.__('Start Printing').'</a>';
+                        $actions .= '<a href="javascript:;" data-href="' . route('admin-printjob-hold', $data->id) . '" class="hold-print"><i class="fas fa-pause"></i> '.__('Put On Hold').'</a>';
+                    } else {
+                        $actions .= '<span class="dropdown-item text-muted"><i class="fas fa-cogs"></i> '.__('Awaiting Manufacturing').'</span>';
+                    }
                 }
                 
-                if ($data->status === 'printing') {
+                if ($data->status === PrintJob::STATUS_PRINTING) {
                     $actions .= '<a href="javascript:;" data-href="' . route('admin-printjob-complete', $data->id) . '" class="complete-print"><i class="fas fa-check"></i> '.__('Mark Complete').'</a>';
                     $actions .= '<a href="javascript:;" data-href="' . route('admin-printjob-fail', $data->id) . '" class="fail-print"><i class="fas fa-times"></i> '.__('Mark Failed').'</a>';
                 }
                 
-                if ($data->status === 'on_hold') {
+                if ($data->status === PrintJob::STATUS_ON_HOLD) {
                     $actions .= '<a href="javascript:;" data-href="' . route('admin-printjob-resume', $data->id) . '" class="resume-print"><i class="fas fa-play"></i> '.__('Resume').'</a>';
                 }
                 
@@ -151,7 +166,10 @@ class PrintJobController extends AdminBaseController
     public function show($id)
     {
         $job = PrintJob::with(['order', 'product', 'printer'])->findOrFail($id);
-        return view('admin.printjob.show', compact('job'));
+        $designFile = $job->design_file ?: optional($job->product)->print_file;
+        $designFileUrl = $this->resolvePrintFileUrl($designFile);
+
+        return view('admin.printjob.show', compact('job', 'designFileUrl'));
     }
 
     /**
@@ -159,13 +177,22 @@ class PrintJobController extends AdminBaseController
      */
     public function start(Request $request, $id)
     {
-        $job = PrintJob::findOrFail($id);
+        $job = PrintJob::with('order')->findOrFail($id);
         
-        if ($job->status !== 'queued') {
+        if ($job->status !== PrintJob::STATUS_QUEUED) {
             return response()->json(['error' => 'Job is not in queue'], 400);
         }
 
+        if (!$job->order || $job->order->status !== 'processing') {
+            return response()->json(['error' => 'Order is not in processing state'], 400);
+        }
+
+        if (!in_array($job->order->print_status, [Order::PRINT_STATUS_PRINT_READY, Order::PRINT_STATUS_PENDING], true)) {
+            return response()->json(['error' => 'Order must be Print Ready before starting jobs'], 400);
+        }
+
         $job->start(auth()->guard('admin')->id());
+        $this->syncOrderPrintStateFromJobs($job->order_id);
 
         return response()->json([
             'success' => true,
@@ -180,7 +207,7 @@ class PrintJobController extends AdminBaseController
     {
         $job = PrintJob::findOrFail($id);
         
-        if ($job->status !== 'printing') {
+        if ($job->status !== PrintJob::STATUS_PRINTING) {
             return response()->json(['error' => 'Job is not currently printing'], 400);
         }
 
@@ -204,8 +231,18 @@ class PrintJobController extends AdminBaseController
             'reason' => 'required|string|max:500'
         ]);
 
-        $job = PrintJob::findOrFail($id);
+        $job = PrintJob::with('order')->findOrFail($id);
+
+        if ($job->order && $job->order->print_status === Order::PRINT_STATUS_MANUFACTURING) {
+            return response()->json(['error' => 'Order is still in manufacturing'], 400);
+        }
+
+        if (!in_array($job->status, [PrintJob::STATUS_QUEUED, PrintJob::STATUS_PRINTING, PrintJob::STATUS_ON_HOLD], true)) {
+            return response()->json(['error' => 'Job cannot be marked as failed from its current status'], 400);
+        }
+
         $job->fail($request->reason);
+        $this->syncOrderPrintStateFromJobs($job->order_id);
 
         return response()->json([
             'success' => true,
@@ -222,8 +259,18 @@ class PrintJobController extends AdminBaseController
             'reason' => 'required|string|max:500'
         ]);
 
-        $job = PrintJob::findOrFail($id);
+        $job = PrintJob::with('order')->findOrFail($id);
+
+        if ($job->order && $job->order->print_status === Order::PRINT_STATUS_MANUFACTURING) {
+            return response()->json(['error' => 'Order is still in manufacturing'], 400);
+        }
+
+        if (!in_array($job->status, [PrintJob::STATUS_QUEUED, PrintJob::STATUS_PRINTING], true)) {
+            return response()->json(['error' => 'Only queued or printing jobs can be put on hold'], 400);
+        }
+
         $job->hold($request->reason);
+        $this->syncOrderPrintStateFromJobs($job->order_id);
 
         return response()->json([
             'success' => true,
@@ -236,13 +283,18 @@ class PrintJobController extends AdminBaseController
      */
     public function resume($id)
     {
-        $job = PrintJob::findOrFail($id);
+        $job = PrintJob::with('order')->findOrFail($id);
+
+        if ($job->order && $job->order->print_status === Order::PRINT_STATUS_MANUFACTURING) {
+            return response()->json(['error' => 'Order is still in manufacturing'], 400);
+        }
         
-        if ($job->status !== 'on_hold') {
-            return response()->json(['error' => 'Job is not on hold'], 400);
+        if (!in_array($job->status, [PrintJob::STATUS_ON_HOLD, PrintJob::STATUS_FAILED], true)) {
+            return response()->json(['error' => 'Only failed or on-hold jobs can be resumed'], 400);
         }
 
         $job->resume();
+        $this->syncOrderPrintStateFromJobs($job->order_id);
 
         return response()->json([
             'success' => true,
@@ -260,6 +312,11 @@ class PrintJobController extends AdminBaseController
         ]);
 
         $job = PrintJob::findOrFail($id);
+
+        if ($job->status === PrintJob::STATUS_COMPLETED) {
+            return response()->json(['error' => 'Completed jobs cannot be reassigned'], 400);
+        }
+
         $job->update(['printer_id' => $request->printer_id]);
 
         return response()->json([
@@ -276,37 +333,64 @@ class PrintJobController extends AdminBaseController
         $request->validate([
             'action' => 'required|in:start,hold,resume,assign',
             'job_ids' => 'required|array',
-            'job_ids.*' => 'exists:print_jobs,id'
+            'job_ids.*' => 'exists:print_jobs,id',
+            'printer_id' => 'nullable|required_if:action,assign|exists:admins,id',
+            'reason' => 'nullable|string|max:500',
         ]);
 
-        $jobs = PrintJob::whereIn('id', $request->job_ids)->get();
+        $jobs = PrintJob::with('order')->whereIn('id', $request->job_ids)->get();
         $count = 0;
+        $affectedOrderIds = [];
 
         foreach ($jobs as $job) {
             switch ($request->action) {
                 case 'start':
-                    if ($job->status === 'queued') {
+                    $canStart = $job->status === PrintJob::STATUS_QUEUED
+                        && $job->order
+                        && $job->order->status === 'processing'
+                        && in_array($job->order->print_status, [Order::PRINT_STATUS_PRINT_READY, Order::PRINT_STATUS_PENDING], true);
+
+                    if ($canStart) {
                         $job->start(auth()->guard('admin')->id());
                         $count++;
+                        $affectedOrderIds[] = $job->order_id;
                     }
                     break;
                 case 'hold':
-                    if ($job->status === 'queued') {
+                    $canHold = in_array($job->status, [PrintJob::STATUS_QUEUED, PrintJob::STATUS_PRINTING], true)
+                        && $job->order
+                        && $job->order->status === 'processing'
+                        && $job->order->print_status !== Order::PRINT_STATUS_MANUFACTURING;
+
+                    if ($canHold) {
                         $job->hold($request->reason ?? 'Bulk action');
                         $count++;
+                        $affectedOrderIds[] = $job->order_id;
                     }
                     break;
                 case 'resume':
-                    if ($job->status === 'on_hold') {
+                    $canResume = in_array($job->status, [PrintJob::STATUS_ON_HOLD, PrintJob::STATUS_FAILED], true)
+                        && $job->order
+                        && $job->order->status === 'processing'
+                        && $job->order->print_status !== Order::PRINT_STATUS_MANUFACTURING;
+
+                    if ($canResume) {
                         $job->resume();
                         $count++;
+                        $affectedOrderIds[] = $job->order_id;
                     }
                     break;
                 case 'assign':
-                    $job->update(['printer_id' => $request->printer_id]);
-                    $count++;
+                    if ($job->status !== PrintJob::STATUS_COMPLETED) {
+                        $job->update(['printer_id' => $request->printer_id]);
+                        $count++;
+                    }
                     break;
             }
+        }
+
+        foreach (array_unique(array_filter($affectedOrderIds)) as $orderId) {
+            $this->syncOrderPrintStateFromJobs($orderId);
         }
 
         return response()->json([
@@ -342,17 +426,88 @@ class PrintJobController extends AdminBaseController
      */
     protected function checkOrderPrintCompletion($orderId)
     {
-        $order = Order::find($orderId);
-        if (!$order) return;
+        $this->syncOrderPrintStateFromJobs($orderId);
+    }
 
-        $totalJobs = PrintJob::where('order_id', $orderId)->count();
-        $completedJobs = PrintJob::where('order_id', $orderId)->completed()->count();
+    /**
+     * Resolve a print file to a public URL, supporting legacy locations.
+     */
+    protected function resolvePrintFileUrl($printFile)
+    {
+        if (empty($printFile)) {
+            return null;
+        }
 
-        if ($totalJobs > 0 && $totalJobs === $completedJobs) {
-            // All print jobs completed, update order status to processing
-            if ($order->status === 'pending') {
-                $order->update(['status' => 'processing']);
+        if (filter_var($printFile, FILTER_VALIDATE_URL)) {
+            return $printFile;
+        }
+
+        $normalized = ltrim($printFile, '/');
+        $candidates = [
+            ['disk' => public_path($normalized), 'url' => asset($normalized)],
+            ['disk' => public_path('assets/files/designs/' . $normalized), 'url' => asset('assets/files/designs/' . $normalized)],
+            ['disk' => public_path('assets/images/products/' . $normalized), 'url' => asset('assets/images/products/' . $normalized)],
+        ];
+
+        foreach ($candidates as $candidate) {
+            if (file_exists($candidate['disk'])) {
+                return $candidate['url'];
             }
+        }
+
+        return null;
+    }
+
+    /**
+     * Keep order-level print status in sync with line-item print jobs.
+     */
+    protected function syncOrderPrintStateFromJobs($orderId)
+    {
+        $order = Order::find($orderId);
+        if (!$order) {
+            return;
+        }
+
+        // Do not mutate finalized/shipped orders from print-job actions.
+        if ($order->print_status === Order::PRINT_STATUS_SHIPPED || $order->status === 'completed') {
+            return;
+        }
+
+        $statusCounts = PrintJob::where('order_id', $orderId)
+            ->selectRaw('status, COUNT(*) as aggregate')
+            ->groupBy('status')
+            ->pluck('aggregate', 'status');
+
+        $totalJobs = (int) $statusCounts->sum();
+        if ($totalJobs === 0) {
+            return;
+        }
+
+        $completedJobs = (int) ($statusCounts[PrintJob::STATUS_COMPLETED] ?? 0);
+        $printingJobs = (int) ($statusCounts[PrintJob::STATUS_PRINTING] ?? 0);
+
+        $updates = [];
+
+        if ($completedJobs === $totalJobs) {
+            $updates['print_status'] = Order::PRINT_STATUS_PRINTED;
+            $updates['printed_at'] = now();
+            if ($order->status === 'pending') {
+                $updates['status'] = 'processing';
+            }
+        } elseif ($printingJobs > 0) {
+            $updates['print_status'] = Order::PRINT_STATUS_PRINTING;
+            $updates['printed_at'] = null;
+            if ($order->status === 'pending') {
+                $updates['status'] = 'processing';
+            }
+        } else {
+            // Queue/on-hold/failed states all mean the order is not fully printed yet.
+            $updates['print_status'] = Order::PRINT_STATUS_PRINT_READY;
+            $updates['printed_at'] = null;
+        }
+
+        if (!empty($updates)) {
+            $order->update($updates);
         }
     }
 }

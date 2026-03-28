@@ -1,0 +1,1 @@
+<?php /**PATH C:\laragon\www\xmerch\project\resources\views\admin\language\translation.blade.php ENDPATH**/ ?>

@@ -25,35 +25,22 @@ class ManufacturingController extends Controller
         $today = today();
         
         // Get all POD products with capacity
-        $podProducts = Product::where('is_pod', 1)
-            ->where('production_cap', '>', 0)
+        $podProducts = Product::pod()
+            ->withPositiveProductionCap()
             ->get();
         
         // Calculate daily capacity utilization
         $totalCapacity = $podProducts->sum('production_cap');
         $capacityUsed = 0;
         $productsAtCapacity = 0;
+        $dailyQuantities = $this->getTodayPodQuantities($today);
         
         foreach ($podProducts as $product) {
-            $dailyOrders = Order::where('status', 'processing')
-                ->whereDate('created_at', $today)
-                ->get()
-                ->filter(function($order) use ($product) {
-                    $cart = json_decode($order->cart, true);
-                    if (isset($cart['items'])) {
-                        foreach ($cart['items'] as $item) {
-                            if ($item['item']['id'] == $product->id) {
-                                return true;
-                            }
-                        }
-                    }
-                    return false;
-                })
-                ->count();
+            $dailyOrders = (int) ($dailyQuantities[$product->id] ?? 0);
             
             $capacityUsed += $dailyOrders;
             
-            if ($dailyOrders >= $product->production_cap) {
+            if ($product->production_cap > 0 && $dailyOrders >= $product->production_cap) {
                 $productsAtCapacity++;
             }
         }
@@ -89,30 +76,17 @@ class ManufacturingController extends Controller
      */
     public function capacity()
     {
-        $podProducts = Product::where('is_pod', 1)
-            ->where('production_cap', '>', 0)
+        $podProducts = Product::pod()
+            ->withPositiveProductionCap()
             ->orderBy('name')
             ->get();
         
         $today = today();
+        $dailyQuantities = $this->getTodayPodQuantities($today);
         
         // Calculate utilization for each product
         foreach ($podProducts as $product) {
-            $dailyOrders = Order::where('status', 'processing')
-                ->whereDate('created_at', $today)
-                ->get()
-                ->filter(function($order) use ($product) {
-                    $cart = json_decode($order->cart, true);
-                    if (isset($cart['items'])) {
-                        foreach ($cart['items'] as $item) {
-                            if ($item['item']['id'] == $product->id) {
-                                return true;
-                            }
-                        }
-                    }
-                    return false;
-                })
-                ->count();
+            $dailyOrders = (int) ($dailyQuantities[$product->id] ?? 0);
             
             $product->daily_orders = $dailyOrders;
             $product->remaining_capacity = max(0, $product->production_cap - $dailyOrders);
@@ -332,18 +306,32 @@ class ManufacturingController extends Controller
         $cart = json_decode($order->cart, true);
         $order->cart_items = $cart['items'] ?? [];
         
-        // Get products with full details
+        // Get products with full details in one query.
+        $productIds = collect($order->cart_items)
+            ->map(function ($item) {
+                return $item['item']['id'] ?? null;
+            })
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+        $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
+
+        // Build manufacturing details per cart item.
         $productDetails = [];
         foreach ($order->cart_items as $item) {
             if (isset($item['item']['id'])) {
-                $product = Product::find($item['item']['id']);
+                $product = $products->get($item['item']['id']);
                 if ($product) {
+                    $printFile = $item['print_file'] ?? $product->print_file;
                     $productDetails[] = [
                         'product' => $product,
                         'qty' => $item['qty'] ?? 1,
                         'size' => $item['size'] ?? null,
                         'color' => $item['color'] ?? null,
                         'price' => $item['price'] ?? 0,
+                        'print_file' => $printFile,
+                        'print_file_url' => $this->resolvePrintFileUrl($printFile),
                     ];
                 }
             }
@@ -351,6 +339,63 @@ class ManufacturingController extends Controller
         $order->product_details = $productDetails;
         
         return view('admin.manufacturing.show', compact('order'));
+    }
+
+    /**
+     * Resolve absolute URL for a print file stored in cart/product.
+     */
+    protected function resolvePrintFileUrl($printFile)
+    {
+        if (empty($printFile)) {
+            return null;
+        }
+
+        if (filter_var($printFile, FILTER_VALIDATE_URL)) {
+            return $printFile;
+        }
+
+        $normalized = ltrim($printFile, '/');
+        $candidates = [
+            ['disk' => public_path($normalized), 'url' => asset($normalized)],
+            ['disk' => public_path('assets/files/designs/' . $normalized), 'url' => asset('assets/files/designs/' . $normalized)],
+            ['disk' => public_path('assets/images/products/' . $normalized), 'url' => asset('assets/images/products/' . $normalized)],
+        ];
+
+        foreach ($candidates as $candidate) {
+            if (file_exists($candidate['disk'])) {
+                return $candidate['url'];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Aggregate today's POD quantities per product from processing orders.
+     */
+    protected function getTodayPodQuantities($date)
+    {
+        $quantities = [];
+        $orders = Order::where('status', 'processing')
+            ->whereDate('created_at', $date)
+            ->get(['cart']);
+
+        foreach ($orders as $order) {
+            $cart = json_decode($order->cart, true);
+            if (!isset($cart['items']) || !is_array($cart['items'])) {
+                continue;
+            }
+
+            foreach ($cart['items'] as $item) {
+                $pid = $item['item']['id'] ?? null;
+                if (!$pid) {
+                    continue;
+                }
+                $quantities[$pid] = ($quantities[$pid] ?? 0) + (int) ($item['qty'] ?? 1);
+            }
+        }
+
+        return $quantities;
     }
 
     /**
@@ -363,8 +408,8 @@ class ManufacturingController extends Controller
             ->get();
         
         // Get products with production capacity
-        $equipment = Product::where('is_pod', 1)
-            ->where('production_cap', '>', 0)
+        $equipment = Product::pod()
+            ->withPositiveProductionCap()
             ->get();
         
         return view('admin.manufacturing.printers', compact('printers', 'equipment'));

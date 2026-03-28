@@ -34,13 +34,13 @@
                                     <th>{{ __('Order') }}</th>
                                     <td>
                                         <a href="{{ route('admin-order-show', $job->order_id) }}" target="_blank">
-                                            #{{ $job->order->order_number ?? 'N/A' }}
+                                            #{{ optional($job->order)->order_number ?? 'N/A' }}
                                         </a>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th>{{ __('Product') }}</th>
-                                    <td>{{ $job->product->name ?? 'N/A' }}</td>
+                                    <td>{{ optional($job->product)->name ?? 'N/A' }}</td>
                                 </tr>
                                 <tr>
                                     <th>{{ __('Quantity') }}</th>
@@ -60,7 +60,7 @@
                                 </tr>
                                 <tr>
                                     <th>{{ __('Assigned To') }}</th>
-                                    <td>{{ $job->printer->name ?? __('Unassigned') }}</td>
+                                    <td>{{ optional($job->printer)->name ?? __('Unassigned') }}</td>
                                 </tr>
                                 <tr>
                                     <th>{{ __('Created') }}</th>
@@ -182,12 +182,8 @@
                         </button>
                     @endif
 
-                    @if($job->design_file)
-                    <a href="{{ asset('assets/files/designs/' . $job->design_file) }}" class="btn btn-primary btn-block mb-2" download>
-                        <i class="fas fa-download"></i> {{ __('Download Print File') }}
-                    </a>
-                    @elseif($job->product && $job->product->print_file)
-                    <a href="{{ asset('assets/files/designs/' . $job->product->print_file) }}" class="btn btn-primary btn-block mb-2" download>
+                    @if($designFileUrl)
+                    <a href="{{ $designFileUrl }}" class="btn btn-primary btn-block mb-2" download>
                         <i class="fas fa-download"></i> {{ __('Download Print File') }}
                     </a>
                     @else

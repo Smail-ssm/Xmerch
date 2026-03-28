@@ -18,6 +18,8 @@ This setup deploys XMerch as an isolated Docker stack on the same VPS that runs 
 - `/deploy/production/docker-compose.yml`
 - `/deploy/production/.env.production.example`
 - `/deploy/production/.stack.env.example`
+- `/deploy/scripts/backup-local-db.ps1`
+- `/deploy/scripts/restore-db-on-vps.sh`
 
 ## Required GitHub Secrets
 
@@ -63,4 +65,3 @@ docker compose --project-name xmerch --env-file .stack.env -f docker-compose.yml
   - `php artisan route:cache`
   - `php artisan view:cache`
 - Uploaded files are persisted in Docker volumes (`assets/images`, `assets/temp_files`, and `project/storage`).
-
