@@ -1,0 +1,17 @@
+.git
+.github
+.idea
+.vscode
+node_modules
+project/node_modules
+project/vendor
+project/.env
+project/.env.*
+project/storage/framework/cache/*
+project/storage/framework/sessions/*
+project/storage/framework/views/*
+project/storage/logs/*
+project/bootstrap/cache/config.php
+project/bootstrap/cache/routes*.php
+*.log
+
